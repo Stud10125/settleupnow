@@ -1,4 +1,15 @@
-package com.example.settleupnow.viewmodel
+package com.example.myapplication
 
-class LoginViewModel {
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
+
+class LoginViewModel : ViewModel() {
+
+    var email = mutableStateOf("")
+    var password = mutableStateOf("")
+
+    fun loginUser() {
+        val emailValue = email.value
+        val passwordValue = password.value
+    }
 }
