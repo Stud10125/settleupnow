@@ -9,4 +9,5 @@
     <string name="title_activity_group_details_screen">GroupDetailsScreen</string>
     <string name="title_activity_add_expense_screen">AddExpenseScreen</string>
     <string name="title_activity_summary_screen">SummaryScreen</string>
+    <string name="title_activity_member">MemberActivity</string>
 </resources>

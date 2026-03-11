@@ -12,6 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SettleUpNow">
         <activity
+            android:name=".view.composables.MemberActivity"
+            android:exported="false"
+            android:label="@string/title_activity_member"
+            android:theme="@style/Theme.SettleUpNow" />
+        <activity
             android:name=".view.composables.SummaryScreen"
             android:exported="false"
             android:label="@string/title_activity_summary_screen"
