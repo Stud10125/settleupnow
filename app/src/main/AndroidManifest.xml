@@ -12,6 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SettleUpNow">
         <activity
+            android:name=".view.composables.MainActivity"
+            android:exported="false"
+            android:label="@string/title_activity_main"
+            android:theme="@style/Theme.SettleUpNow" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
