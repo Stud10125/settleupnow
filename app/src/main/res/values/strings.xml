@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">SettleUpNow</string>
+    <string name="title_activity_profile_screen">ProfileScreen</string>
+    <string name="title_activity_login_screen">LoginScreen</string>
+    <string name="title_activity_register_screen">RegisterScreen</string>
+    <string name="title_activity_home_page_screen">HomePageScreen</string>
+    <string name="title_activity_homepage_screen">HomepageScreen</string>
+    <string name="title_activity_add_group_screen">AddGroupScreen</string>
+    <string name="title_activity_group_details_screen">GroupDetailsScreen</string>
+    <string name="title_activity_add_expense_screen">AddExpenseScreen</string>
+    <string name="title_activity_summary_screen">SummaryScreen</string>
 </resources>
