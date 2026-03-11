@@ -1,4 +1,4 @@
-package com.example.settleupnow.view.composables.ui.theme
+package com.example.settleupnow.view.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

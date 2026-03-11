@@ -1,4 +1,4 @@
-package com.example.settleupnow.ui.theme
+package com.example.settleupnow.view.ui.theme
 
 import android.app.Activity
 import android.os.Build
