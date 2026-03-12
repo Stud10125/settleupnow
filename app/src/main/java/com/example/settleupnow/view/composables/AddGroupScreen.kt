@@ -10,11 +10,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.settleupnow.model.User
 import com.example.settleupnow.viewmodel.AddGroupViewModel
 
 @Composable
@@ -25,6 +24,10 @@ fun AddGroupScreen(
     val groupName by viewModel.groupName.collectAsState()
     val description by viewModel.description.collectAsState()
     val members by viewModel.members.collectAsState()
+
+    var showDialog by remember { mutableStateOf(false) }
+    var memberEmail by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         bottomBar = {
@@ -37,8 +40,13 @@ fun AddGroupScreen(
             ) {
                 Button(
                     onClick = {
-                        viewModel.createGroup()
-                        navController.popBackStack()
+                        viewModel.createGroup { success, message ->
+                            if (success) {
+                                navController.popBackStack()
+                            } else {
+                                errorMessage = message
+                            }
+                        }
                     },
                     modifier = Modifier.weight(1f),
                     enabled = groupName.isNotBlank()
@@ -63,7 +71,6 @@ fun AddGroupScreen(
             Text(
                 text = "Add Group",
                 fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
 
@@ -82,7 +89,7 @@ fun AddGroupScreen(
             OutlinedTextField(
                 value = description,
                 onValueChange = { viewModel.onDescriptionChange(it) },
-                label = { Text("Description(optional)") },
+                label = { Text("Description (optional)") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -93,12 +100,8 @@ fun AddGroupScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Members",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium
-                )
-                TextButton(onClick = { /* TODO: Show add member dialog or screen */ }) {
+                Text("Members", fontSize = 18.sp)
+                TextButton(onClick = { showDialog = true }) {
                     Icon(Icons.Default.Add, contentDescription = null)
                     Spacer(Modifier.width(4.dp))
                     Text("Add member")
@@ -107,9 +110,7 @@ fun AddGroupScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            LazyColumn(
-                modifier = Modifier.weight(1f)
-            ) {
+            LazyColumn(modifier = Modifier.weight(1f)) {
                 items(members) { user ->
                     ListItem(
                         headlineContent = { Text(user.name) },
@@ -122,6 +123,47 @@ fun AddGroupScreen(
                     )
                 }
             }
+
+            errorMessage?.let {
+                Spacer(Modifier.height(12.dp))
+                Text(it, color = MaterialTheme.colorScheme.error)
+            }
         }
+    }
+
+    // Dialog for adding member
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Add Member") },
+            text = {
+                OutlinedTextField(
+                    value = memberEmail,
+                    onValueChange = { memberEmail = it },
+                    label = { Text("Enter member email") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.addMemberByEmail(memberEmail) { success, message ->
+                        if (success) {
+                            showDialog = false
+                            memberEmail = ""
+                        } else {
+                            errorMessage = message
+                        }
+                    }
+                }) {
+                    Text("Done")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Close")
+                }
+            }
+        )
     }
 }

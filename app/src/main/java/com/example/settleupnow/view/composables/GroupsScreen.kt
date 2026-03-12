@@ -62,7 +62,8 @@ fun GroupsScreen(
                                 color = Color(0xFFE3F2FD),
                                 shape = RoundedCornerShape(10.dp)
                             )
-                            .clickable { navController.navigate(Routes.GROUP_DATA) }
+                            // ✅ Pass groupId when navigating
+                            .clickable { navController.navigate("${Routes.GROUP_DATA}/${group.id}") }
                             .padding(16.dp),
                         contentAlignment = Alignment.CenterStart
                     ) {
@@ -70,6 +71,7 @@ fun GroupsScreen(
                     }
                 }
             }
+
         }
         
         Button(

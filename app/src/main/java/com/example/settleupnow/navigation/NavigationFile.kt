@@ -66,11 +66,7 @@ fun AppNavigation(
             )
         }
 
-        composable(Routes.GROUP_DETAILS) {
-            GroupDetailScreen(
-                navController = navController
-            )
-        }
+
 
         composable(Routes.ADD_EXPENSE) {
             AddExpencesScreen(
@@ -86,17 +82,30 @@ fun AppNavigation(
             )
         }
 
-        composable(Routes.GROUP_DATA) {
-            GroupDetailScreen(
-                navController = navController
-            )
+//        composable(Routes.GROUP_DATA) {
+//            GroupDetailScreen(
+//                navController = navController
+//            )
+//        }
+
+        composable("${Routes.GROUP_DATA}/{groupId}") { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            GroupDetailScreen(navController, groupId)
         }
 
-        composable(Routes.GROUP_INFO) {
-            GroupInfo(
-                navController = navController
-            )
+        composable("${Routes.GROUP_INFO}/{groupId}") { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            GroupInfoScreen(groupId = groupId)
         }
+
+
+
+
+//        composable(Routes.GROUP_INFO) {
+//            GroupInfo(
+//                navController = navController
+//            )
+//        }
 
         composable(Routes.SUMMARY) {
             SummaryScreen(

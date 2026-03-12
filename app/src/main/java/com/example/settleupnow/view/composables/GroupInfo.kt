@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -26,58 +27,25 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.settleupnow.viewmodel.GroupInfoViewModel
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GroupInfo(
-    navController: NavController,
-    viewModel: GroupInfoViewModel = viewModel()
-) {
-    val groupName by viewModel.groupName.collectAsState()
+fun GroupInfoScreen(groupId: String, viewModel: GroupInfoViewModel = viewModel()) {
     val members by viewModel.members.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Group Info") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
-        ) {
-            Text(
-                text = groupName,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            Text(
-                text = "Members",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
+    LaunchedEffect(groupId) {
+        viewModel.fetchMembers(groupId)
+    }
 
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                items(members) { user ->
-                    ListItem(
-                        headlineContent = { Text(user.name) },
-                        supportingContent = { Text(user.email) }
-                    )
-                    HorizontalDivider(thickness = 0.5.dp)
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Text("Group Members", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(16.dp))
+
+        if (members.isEmpty()) {
+            Text("No members yet", color = Color.Gray)
+        } else {
+            LazyColumn {
+                items(members) { member ->
+                    Text("${member.name} (${member.email})", fontSize = 16.sp)
+                    Spacer(Modifier.height(8.dp))
                 }
             }
         }
