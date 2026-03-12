@@ -1,5 +1,6 @@
 package com.example.settleupnow.view.composables
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -58,7 +60,9 @@ fun AddExpencesScreen(
     val checkedList by viewModel.checkedList.collectAsState()
     val expencesList by viewModel.expencesList.collectAsState()
     val total by viewModel.total.collectAsState()
+    val members by viewModel.members.collectAsState()
 
+    val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
 
     val hasInvalidUnequalInput = splitType == "Unequal" && expencesList.any { str ->
@@ -71,7 +75,6 @@ fun AddExpencesScreen(
     val isFormValid = isTitleValid && isAmountValid
 
     var expanded by remember { mutableStateOf(false) }
-    val members = List(10) { "Member ${it + 1}" }
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -144,9 +147,9 @@ fun AddExpencesScreen(
             ) {
                 members.forEach { member ->
                     DropdownMenuItem(
-                        text = { Text(member) },
+                        text = { Text(member.name) },
                         onClick = {
-                            viewModel.paidBy(member)
+                            viewModel.paidBy(member.name)
                             expanded = false
                         }
                     )
@@ -189,7 +192,8 @@ fun AddExpencesScreen(
             Text("Select Members", fontWeight = FontWeight.Bold)
 
             LazyColumn(modifier = Modifier.weight(1f)) {
-                itemsIndexed(checkedList) { index, isChecked ->
+                itemsIndexed(members) { index, member ->
+                    val isChecked = checkedList.getOrElse(index) { false }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
@@ -198,21 +202,22 @@ fun AddExpencesScreen(
                             checked = isChecked,
                             onCheckedChange = { viewModel.checkedList(index, it) }
                         )
-                        Text("Member ${index + 1}")
+                        Text(member.name)
                     }
                 }
             }
         } else {
             Text(text = "Enter amount for each *", fontWeight = FontWeight.Bold)
             LazyColumn(modifier = Modifier.weight(1f)) {
-                itemsIndexed(expencesList) { index, memberAmount ->
+                itemsIndexed(members) { index, member ->
+                    val memberAmount = expencesList.getOrElse(index) { "" }
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Member ${index + 1}", modifier = Modifier.weight(1f))
+                        Text(member.name, modifier = Modifier.weight(1f))
                         TextField(
                             value = memberAmount,
                             onValueChange = { viewModel.expencesList(index, it) },
@@ -265,7 +270,14 @@ fun AddExpencesScreen(
         }
 
         Button(
-            onClick = { /* Save logic */ },
+            onClick = { 
+                viewModel.saveExpense { success, message ->
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    if (success) {
+                        navController.popBackStack()
+                    }
+                }
+            },
             enabled = isFormValid,
             modifier = Modifier
                 .fillMaxWidth()

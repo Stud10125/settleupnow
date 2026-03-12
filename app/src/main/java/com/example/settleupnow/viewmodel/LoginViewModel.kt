@@ -1,9 +1,7 @@
 package com.example.settleupnow.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.settleupnow.Repository.FirebaseRepository
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -25,14 +23,7 @@ class LoginViewModel : ViewModel() {
 
     fun loginUser(email: String, password: String, onResult: (Boolean, String) -> Unit) {
         repo.login(email, password) { success, message ->
-            if (success) {
-                val uid = FirebaseAuth.getInstance().currentUser?.uid
-                if (uid != null) {
-                    repo.saveUserToDatabase(uid, email)
-                }
-            }
             onResult(success, message)
         }
     }
-
 }

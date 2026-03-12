@@ -1,8 +1,7 @@
 package com.example.settleupnow.view.composables
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,8 +26,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.settleupnow.viewmodel.GroupInfoViewModel
+
 @Composable
-fun GroupInfoScreen(groupId: String, viewModel: GroupInfoViewModel = viewModel()) {
+fun GroupInfoScreen(
+    groupId: String, 
+    navController: NavController, // Added NavController
+    viewModel: GroupInfoViewModel = viewModel()
+) {
     val members by viewModel.members.collectAsState()
 
     LaunchedEffect(groupId) {
@@ -36,16 +40,33 @@ fun GroupInfoScreen(groupId: String, viewModel: GroupInfoViewModel = viewModel()
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Group Members", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back"
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Group Members", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        }
+        
         Spacer(Modifier.height(16.dp))
 
         if (members.isEmpty()) {
-            Text("No members yet", color = Color.Gray)
+            Text(
+                "No members yet or loading...", 
+                color = Color.Gray, 
+                modifier = Modifier.padding(start = 12.dp)
+            )
         } else {
-            LazyColumn {
+            LazyColumn(modifier = Modifier.padding(horizontal = 8.dp)) {
                 items(members) { member ->
-                    Text("${member.name} (${member.email})", fontSize = 16.sp)
-                    Spacer(Modifier.height(8.dp))
+                    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                        Text(member.name, fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                        Text(member.email, fontSize = 14.sp, color = Color.Gray)
+                        HorizontalDivider(modifier = Modifier.padding(top = 8.dp), thickness = 0.5.dp)
+                    }
                 }
             }
         }

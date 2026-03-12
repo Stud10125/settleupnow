@@ -1,16 +1,15 @@
 package com.example.settleupnow.viewmodel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.settleupnow.Repository.FirebaseRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.example.settleupnow.model.User
+import kotlinx.coroutines.launch
 
-class AddGroupViewModel : ViewModel() {
+class AddGroupViewModel(private val repository: FirebaseRepository = FirebaseRepository()) : ViewModel() {
     private val _groupName = MutableStateFlow("")
     val groupName: StateFlow<String> = _groupName.asStateFlow()
 
@@ -29,16 +28,14 @@ class AddGroupViewModel : ViewModel() {
     }
 
     fun addMember(user: User) {
-        if (!_members.value.contains(user)) {
-            _members.value = _members.value + user
-        }
+        if (!_members.value.all { it.userId != user.userId }) return // Check by ID
+        _members.value = _members.value + user
     }
 
     fun removeMember(user: User) {
-        _members.value = _members.value - user
+        _members.value = _members.value.filter { it.userId != user.userId }
     }
 
-    // 🔍 Add member by email lookup
     fun addMemberByEmail(email: String, onResult: (Boolean, String) -> Unit) {
         val db = com.google.firebase.database.FirebaseDatabase.getInstance().reference
         db.child("users").orderByChild("email").equalTo(email).get()
@@ -59,17 +56,17 @@ class AddGroupViewModel : ViewModel() {
             }
     }
 
-    // ✅ Save group into Firebase
-    fun createGroup(onResult: (Boolean, String) -> Unit = { _, _ -> }) {
-        val db = com.google.firebase.database.FirebaseDatabase.getInstance().reference
-        val groupId = db.child("groups").push().key ?: return
-        val groupData = mapOf(
-            "name" to _groupName.value,
-            "description" to _description.value,
-            "members" to _members.value.map { mapOf("uid" to it.userId, "name" to it.name, "email" to it.email) }
+    fun createGroup(onResult: (Boolean, String) -> Unit) {
+        if (_groupName.value.isBlank()) {
+            onResult(false, "Group name cannot be empty")
+            return
+        }
+        
+        repository.createGroup(
+            name = _groupName.value,
+            description = _description.value,
+            members = _members.value,
+            onResult = onResult
         )
-        db.child("groups").child(groupId).setValue(groupData)
-            .addOnSuccessListener { onResult(true, "Group created") }
-            .addOnFailureListener { onResult(false, it.message ?: "Error creating group") }
     }
 }

@@ -6,10 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.settleupnow.view.composables.*
-import com.example.settleupnow.viewmodel.AddExpencesViewModel
-import com.example.settleupnow.viewmodel.AddGroupViewModel
-import com.example.settleupnow.viewmodel.LoginViewModel
-import com.example.settleupnow.viewmodel.RegisterViewModel
+import com.example.settleupnow.viewmodel.*
 
 object Routes {
     const val LOGIN = "login"
@@ -23,21 +20,18 @@ object Routes {
     const val SUMMARY = "summary"
     const val EDIT_EXPENSE = "edit_expense"
     const val EXPENSE_INFO = "expense_info"
-
 }
 
 @Composable
 fun AppNavigation(
     loginViewModel: LoginViewModel = viewModel(),
     addGroupViewModel: AddGroupViewModel = viewModel(),
-    registerViewModel: RegisterViewModel = viewModel()
+    registerViewModel: RegisterViewModel = viewModel(),
+    addExpencesViewModel: AddExpencesViewModel = viewModel(),
+    summaryViewModel: SummaryViewModel = viewModel(),
+    analyticsViewModel: AnalyticsViewModel = viewModel()
 ) {
     val navController = rememberNavController()
-
-    val addExpencesViewModel : AddExpencesViewModel = viewModel()
-    val addGroupViewModel: AddGroupViewModel = viewModel()
-
-
 
     NavHost(navController = navController, startDestination = Routes.LOGIN) {
 
@@ -66,9 +60,9 @@ fun AppNavigation(
             )
         }
 
-
-
-        composable(Routes.ADD_EXPENSE) {
+        composable("${Routes.ADD_EXPENSE}/{groupId}") { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            addExpencesViewModel.setGroupId(groupId)
             AddExpencesScreen(
                 navController = navController,
                 viewModel = addExpencesViewModel
@@ -82,12 +76,6 @@ fun AppNavigation(
             )
         }
 
-//        composable(Routes.GROUP_DATA) {
-//            GroupDetailScreen(
-//                navController = navController
-//            )
-//        }
-
         composable("${Routes.GROUP_DATA}/{groupId}") { backStackEntry ->
             val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
             GroupDetailScreen(navController, groupId)
@@ -95,35 +83,22 @@ fun AppNavigation(
 
         composable("${Routes.GROUP_INFO}/{groupId}") { backStackEntry ->
             val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
-            GroupInfoScreen(groupId = groupId)
+            GroupInfoScreen(groupId = groupId, navController = navController)
         }
 
-
-
-
-//        composable(Routes.GROUP_INFO) {
-//            GroupInfo(
-//                navController = navController
-//            )
-//        }
-
-        composable(Routes.SUMMARY) {
-            SummaryScreen(
-                navController = navController
-            )
+        composable("${Routes.EXPENSE_INFO}/{expenseId}") { backStackEntry ->
+            val expenseId = backStackEntry.arguments?.getString("expenseId") ?: ""
+            ExpenseInfoScreen(expenseId = expenseId, navController = navController)
         }
 
-        composable(Routes.EDIT_EXPENSE) {
-            EditExpenseScreen(
-                navController = navController
-            )
+        composable("${Routes.SUMMARY}/{groupId}") { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            SummaryScreen(groupId = groupId, navController = navController, viewModel = summaryViewModel)
         }
 
-        composable(Routes.EXPENSE_INFO) {
-            ExpenseInfoScreen(
-                navController = navController
-            )
+        composable("${Routes.EDIT_EXPENSE}/{expenseId}") { backStackEntry ->
+            val expenseId = backStackEntry.arguments?.getString("expenseId") ?: ""
+            EditExpenseScreen(expenseId = expenseId, navController = navController)
         }
-
     }
 }

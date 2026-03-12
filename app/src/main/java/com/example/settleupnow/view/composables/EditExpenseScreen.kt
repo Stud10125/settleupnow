@@ -20,11 +20,16 @@ import com.example.settleupnow.viewmodel.EditExpenseViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditExpenseScreen(
+    expenseId: String,
     navController: NavHostController,
     viewModel: EditExpenseViewModel = viewModel()
 ) {
     val expense by viewModel.expense.collectAsState()
     val editedSplits by viewModel.editedSplits.collectAsState()
+
+    LaunchedEffect(expenseId) {
+        viewModel.loadExpense(expenseId)
+    }
 
     Scaffold(
         topBar = {
@@ -83,8 +88,11 @@ fun EditExpenseScreen(
                     }
                     Button(
                         onClick = {
-                            viewModel.saveChanges()
-                            navController.popBackStack()
+                            viewModel.saveChanges { success ->
+                                if (success) {
+                                    navController.popBackStack()
+                                }
+                            }
                         },
                         modifier = Modifier.weight(1f)
                     ) {
