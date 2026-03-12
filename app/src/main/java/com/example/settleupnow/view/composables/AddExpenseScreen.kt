@@ -99,7 +99,6 @@ fun AddExpencesScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Header
         Text(
             text = "Add New Expense",
             fontSize = 24.sp,
@@ -107,7 +106,6 @@ fun AddExpencesScreen(
             modifier = Modifier.padding(bottom = 20.dp)
         )
 
-        // Title Input
         Text(text = "What is this for? *", fontWeight = FontWeight.Bold)
         TextField(
             value = expenceTitle,
@@ -121,7 +119,6 @@ fun AddExpencesScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Description Input
         Text(text = "Add a description", fontWeight = FontWeight.Bold)
         TextField(
             value = description,
@@ -132,7 +129,6 @@ fun AddExpencesScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Paid By Dropdown
         Text(text = "Paid By", fontWeight = FontWeight.Bold)
         Box(modifier = Modifier.fillMaxWidth()) {
             TextField(
@@ -141,7 +137,6 @@ fun AddExpencesScreen(
                 readOnly = true,
                 modifier = Modifier.fillMaxWidth()
             )
-            // This box sits on top to detect clicks for the dropdown
             Box(
                 modifier = Modifier
                     .matchParentSize()
@@ -165,7 +160,6 @@ fun AddExpencesScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Split Type
         Text(text = "How to split?", fontWeight = FontWeight.Bold)
         Row(verticalAlignment = Alignment.CenterVertically) {
             RadioButton(
@@ -184,7 +178,6 @@ fun AddExpencesScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         if (splitType == "Equal") {
-            // Equal Split Input
             Text(text = "Total Amount *", fontWeight = FontWeight.Bold)
             TextField(
                 value = amount,
@@ -214,7 +207,6 @@ fun AddExpencesScreen(
                 }
             }
         } else {
-            // Unequal Split Input
             Text(text = "Enter amount for each *", fontWeight = FontWeight.Bold)
             LazyColumn(modifier = Modifier.weight(1f)) {
                 itemsIndexed(expencesList) { index, memberAmount ->
@@ -235,7 +227,6 @@ fun AddExpencesScreen(
                 }
             }
 
-            // Summary box using basic Column and Background
             val isTotalInvalid = total <= 0
             val hasInteractedWithUnequal = expencesList.any { it.isNotEmpty() }
             val showError = (isTotalInvalid || hasInvalidUnequalInput) && hasInteractedWithUnequal
@@ -268,7 +259,6 @@ fun AddExpencesScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Validation Text
         if (!isFormValid) {
             Text(
                 text = "Please fix the errors or fill required fields.",
@@ -278,7 +268,6 @@ fun AddExpencesScreen(
             )
         }
 
-        // Save Button
         Button(
             onClick = { /* Save logic */ },
             enabled = isFormValid,
@@ -290,8 +279,6 @@ fun AddExpencesScreen(
         }
     }
 }
-
-
 
 //@Preview(showBackground = true)
 //@Composable
