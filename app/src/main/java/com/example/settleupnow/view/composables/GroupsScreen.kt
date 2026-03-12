@@ -1,10 +1,10 @@
 package com.example.settleupnow.view.composables
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -15,15 +15,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.settleupnow.navigation.Routes
-
-//import com.example.ag.AddGroupViewModel
+import com.example.settleupnow.viewmodel.HomePageViewModel
 
 @Composable
 fun GroupsScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: HomePageViewModel = viewModel()
 ) {
+    val groups by viewModel.groups.collectAsState()
+
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text(
             text = "Groups",
@@ -34,26 +37,26 @@ fun GroupsScreen(
 
         Spacer(Modifier.height(16.dp))
 
-//            if (groups.isEmpty()) {
-//                Box(
-//                    modifier = Modifier
-//                        .weight(1f)
-//                        .fillMaxWidth(),
-//                    contentAlignment = Alignment.Center
-//                ) {
-//                    Text(
-//                        text = "No groups yet.\nTap \"Add Group\" to create one.",
-//                        fontSize = 14.sp,
-//                        color = Color.Gray
-//                    )
-//                }
-//            } else {
-//                  }
-            LazyColumn {
-                items(10) { group ->
+        if (groups.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No groups yet.\nTap \"Add Group\" to create one.",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+            }
+        } else {
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                items(groups) { group ->
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(vertical = 4.dp)
                             .height(70.dp)
                             .background(
                                 color = Color(0xFFE3F2FD),
@@ -63,17 +66,17 @@ fun GroupsScreen(
                             .padding(16.dp),
                         contentAlignment = Alignment.CenterStart
                     ) {
-                        Text("Group Name", fontSize = 18.sp)
+                        Text(group.groupName, fontSize = 18.sp)
                     }
                 }
             }
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Button(
-                onClick = { navController.navigate(Routes.ADD_GROUP) },
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text("Add Group")
-            }
+        }
+        
+        Button(
+            onClick = { navController.navigate(Routes.ADD_GROUP) },
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text("Add Group")
         }
     }
 }

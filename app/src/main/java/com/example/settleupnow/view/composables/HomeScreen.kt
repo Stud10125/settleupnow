@@ -26,14 +26,10 @@ fun HomeScreen(navController: NavHostController) {
                             navController = navController
                         )
                     } else if (footerIndex == 1) {
-                        ActivityScreen(
-                            navController = navController
-                        )
-                    } else if (footerIndex == 2) {
                         AnalyticsScreen(
                             navController = navController
                         )
-                    } else if (footerIndex == 3) {
+                    } else if (footerIndex == 2) {
                         ProfileScreen(
                             viewModel = viewModel(),
                             onAccountClick = { },
@@ -60,16 +56,11 @@ fun HomeScreen(navController: NavHostController) {
                 Tab(
                     selected = footerIndex == 1,
                     onClick = { footerIndex = 1 },
-                    text = { Text("Activity") }
+                    text = { Text("Analytics") }
                 )
                 Tab(
                     selected = footerIndex == 2,
                     onClick = { footerIndex = 2 },
-                    text = { Text("Analytics") }
-                )
-                Tab(
-                    selected = footerIndex == 3,
-                    onClick = { footerIndex = 3 },
                     text = { Text("Profile") }
                 )
             }

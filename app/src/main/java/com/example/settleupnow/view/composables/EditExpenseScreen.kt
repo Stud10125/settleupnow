@@ -1,64 +1,95 @@
 package com.example.settleupnow.view.composables
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.settleupnow.viewmodel.EditExpenseViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditExpenseScreen(navController: NavHostController) {
+fun EditExpenseScreen(
+    navController: NavHostController,
+    viewModel: EditExpenseViewModel = viewModel()
+) {
+    val expense by viewModel.expense.collectAsState()
+    val editedSplits by viewModel.editedSplits.collectAsState()
 
-    val members = listOf("Member 1", "Member 2", "Member 3", "Member 4", "Member 5")
-
-    Scaffold { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
-        ) {
-            Text(text = "Members - Cost", modifier = Modifier.padding(bottom = 8.dp))
-
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                items(members) { name ->
-                    Row(modifier = Modifier.padding(vertical = 6.dp)) {
-                        Text(text = name)
-                        Spacer(modifier = Modifier.weight(1f))
-                        OutlinedTextField(
-                            value = "",
-                            onValueChange = {},
-                            label = { Text("Cost") },
-                            modifier = Modifier.width(120.dp)
-                        )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Edit Expense") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
-            }
-
-            Text("Total : 0", modifier = Modifier.padding(vertical = 8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            )
+        }
+    ) { padding ->
+        expense?.let { exp ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp)
             ) {
-                Button(onClick = { navController.popBackStack() }) {
-                    Text("Cancel")
+                Text(text = exp.title, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(text = "Adjust Splits", fontWeight = FontWeight.Medium)
+                
+                LazyColumn(modifier = Modifier.weight(1f)) {
+                    items(editedSplits.toList()) { (member, amount) ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                        ) {
+                            Text(text = member, modifier = Modifier.weight(1f))
+                            OutlinedTextField(
+                                value = amount,
+                                onValueChange = { viewModel.onSplitAmountChange(member, it) },
+                                modifier = Modifier.width(120.dp),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                prefix = { Text("₹") }
+                            )
+                        }
+                    }
                 }
-                Button(onClick = { navController.popBackStack() }) {
-                    Text("Save")
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = { navController.popBackStack() },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Cancel")
+                    }
+                    Button(
+                        onClick = {
+                            viewModel.saveChanges()
+                            navController.popBackStack()
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Save")
+                    }
                 }
             }
         }

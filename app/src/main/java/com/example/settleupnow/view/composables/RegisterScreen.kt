@@ -9,12 +9,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.example.settleupnow.viewmodel.RegisterViewModel
 
 @Composable
 fun RegisterScreenUI(
-    navController: NavController
+    viewModel: RegisterViewModel,
+    onLogin: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -37,8 +37,8 @@ fun RegisterScreenUI(
             Spacer(Modifier.height(30.dp))
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {  },
+                value = viewModel.name.value,
+                onValueChange = { viewModel.name.value = it },
                 label = { Text("FULL NAME") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
@@ -47,8 +47,8 @@ fun RegisterScreenUI(
             Spacer(Modifier.height(12.dp))
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {  },
+                value = viewModel.email.value,
+                onValueChange = { viewModel.email.value = it },
                 label = { Text("EMAIL") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
@@ -57,8 +57,8 @@ fun RegisterScreenUI(
             Spacer(Modifier.height(12.dp))
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {  },
+                value = viewModel.password.value,
+                onValueChange = { viewModel.password.value = it },
                 label = { Text("PASSWORD") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
@@ -67,7 +67,15 @@ fun RegisterScreenUI(
             Spacer(Modifier.height(32.dp))
 
             Button(
-                onClick = {  },
+                onClick = {
+                    viewModel.signUp { success, message ->
+                        if (success) {
+                            onLogin()
+                        } else {
+                            println("Registration failed: $message")
+                        }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -76,9 +84,10 @@ fun RegisterScreenUI(
                 Text("Sign up", fontSize = 18.sp)
             }
 
+
             Spacer(Modifier.height(20.dp))
 
-            TextButton( onClick = {navController.popBackStack()} ) {
+            TextButton(onClick = onLogin) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("Already have an account?", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text("Login", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)

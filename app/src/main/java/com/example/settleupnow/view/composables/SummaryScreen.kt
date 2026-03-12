@@ -1,25 +1,13 @@
 package com.example.settleupnow.view.composables
 
-
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,18 +15,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.settleupnow.viewmodel.SummaryViewModel
 
 @Composable
 fun SummaryScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: SummaryViewModel = viewModel()
 ) {
+    val balances by viewModel.balances.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -47,7 +39,9 @@ fun SummaryScreen(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Summary"
+                text = "Group Summary",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
             )
         }
 
@@ -58,19 +52,49 @@ fun SummaryScreen(
                 .weight(1f)
                 .fillMaxWidth()
         ) {
-            items(10) {
-                Text(text = "Balance", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.Black, modifier = Modifier.padding(2.dp))
+            items(balances) { userBalance ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (userBalance.balance >= 0) 
+                            Color(0xFFE8F5E9) else Color(0xFFFFEBEE)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = userBalance.userName,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = if (userBalance.balance >= 0) 
+                                "Gets back ₹${userBalance.balance}" 
+                                else "Owes ₹${-userBalance.balance}",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (userBalance.balance >= 0) Color(0xFF2E7D32) else Color(0xFFC62828)
+                        )
+                    }
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Back Button
         Button(
-            onClick = { navController.popBackStack() } ,
-            modifier = Modifier.fillMaxWidth()
+            onClick = { navController.popBackStack() },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
         ) {
-            Text(text = "Back")
+            Text(text = "Back to Group")
         }
     }
 }

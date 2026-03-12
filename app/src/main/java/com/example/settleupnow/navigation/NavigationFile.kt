@@ -8,6 +8,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.settleupnow.view.composables.*
 import com.example.settleupnow.viewmodel.AddExpencesViewModel
 import com.example.settleupnow.viewmodel.AddGroupViewModel
+import com.example.settleupnow.viewmodel.LoginViewModel
+import com.example.settleupnow.viewmodel.RegisterViewModel
 
 object Routes {
     const val LOGIN = "login"
@@ -25,7 +27,11 @@ object Routes {
 }
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    loginViewModel: LoginViewModel = viewModel(),
+    addGroupViewModel: AddGroupViewModel = viewModel(),
+    registerViewModel: RegisterViewModel = viewModel()
+) {
     val navController = rememberNavController()
 
     val addExpencesViewModel : AddExpencesViewModel = viewModel()
@@ -37,13 +43,20 @@ fun AppNavigation() {
 
         composable(Routes.LOGIN) {
             LoginScreenUI(
-                navController = navController
+                navController = navController,
+                onRegister = { navController.navigate(Routes.REGISTER) },
+                viewModel = loginViewModel
             )
         }
 
         composable(Routes.REGISTER) {
             RegisterScreenUI(
-                navController = navController
+                viewModel = registerViewModel,
+                onLogin = {
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.REGISTER) { inclusive = true }
+                    }
+                }
             )
         }
 
