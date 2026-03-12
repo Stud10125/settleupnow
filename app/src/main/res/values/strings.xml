@@ -10,4 +10,7 @@
     <string name="title_activity_add_expense_screen">AddExpenseScreen</string>
     <string name="title_activity_summary_screen">SummaryScreen</string>
     <string name="title_activity_member">MemberActivity</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_screen">ActivityScreen</string>
+    <string name="title_activity_analytics_screen">AnalyticsScreen</string>
 </resources>

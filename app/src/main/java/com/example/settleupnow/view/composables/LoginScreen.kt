@@ -11,13 +11,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.myapplication.LoginViewModel
+import com.example.settleupnow.navigation.Routes
 
 @Composable
 fun LoginScreenUI(
-    navController: NavController,
-    onRegister: () -> Unit,
-    viewModel: LoginViewModel
+    navController: NavController
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -33,7 +31,10 @@ fun LoginScreenUI(
             Box(
                 modifier = Modifier
                     .size(80.dp)
-                    .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(20.dp)),
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        RoundedCornerShape(20.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Text("Logo", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
@@ -51,8 +52,8 @@ fun LoginScreenUI(
             Spacer(Modifier.height(30.dp))
 
             OutlinedTextField(
-                value = viewModel.email.value,
-                onValueChange = { viewModel.email.value = it },
+                value = "",
+                onValueChange = {  },
                 label = { Text("EMAIL") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
@@ -61,8 +62,8 @@ fun LoginScreenUI(
             Spacer(Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = viewModel.password.value,
-                onValueChange = { viewModel.password.value = it },
+                value = "",
+                onValueChange = { },
                 label = { Text("PASSWORD") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
@@ -72,10 +73,7 @@ fun LoginScreenUI(
 
             Button(
                 onClick = {
-                    viewModel.loginUser()
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.LOGIN) { inclusive = true }
-                    }
+                    navController.navigate(Routes.HOME)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -87,7 +85,7 @@ fun LoginScreenUI(
 
             Spacer(Modifier.height(20.dp))
 
-            TextButton(onClick = onRegister) {
+            TextButton(onClick = { navController.navigate(Routes.REGISTER) }) {
                 Text("New user? Register", color = MaterialTheme.colorScheme.secondary)
             }
         }

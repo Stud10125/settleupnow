@@ -1,9 +1,5 @@
 package com.example.settleupnow.view.composables
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,34 +14,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.settleupnow.view.composables.ui.theme.SettleUpNowTheme
 import com.example.settleupnow.viewmodel.ProfileViewModel
 
-class ProfileScreen : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            SettleUpNowTheme {
-                val viewModel: ProfileViewModel = viewModel()
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AppNavigation()
-                }
-            }
-        }
-    }
-}
 
 
 @Composable
@@ -107,28 +86,28 @@ fun ChangePasswordScreen(viewModel: ProfileViewModel = viewModel()) {
         Spacer(modifier = Modifier.height(20.dp))
 
         OutlinedTextField(
-            value = viewModel.email,
-            onValueChange = { viewModel.onEmailChanged(it) },
+            value = "",
+            onValueChange = {  },
             placeholder = { Text("Enter email") },
             modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
-            value = viewModel.newPassword,
-            onValueChange = { viewModel.onNewPasswordChanged(it) },
+            value = "",
+            onValueChange = {  },
             placeholder = { Text("Enter new password") },
             modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
-            value = viewModel.confirmPassword,
-            onValueChange = { viewModel.onConfirmPasswordChanged(it) },
+            value = "",
+            onValueChange = { },
             placeholder = { Text("Confirm password") },
             modifier = Modifier.fillMaxWidth()
         )
 
         Button(
-            onClick = { viewModel.changePassword() },
+            onClick = {  },
             modifier = Modifier.width(170.dp),
 //            enabled = viewModel.email.isNotBlank() &&
 //                    viewModel.newPassword.isNotBlank() &&

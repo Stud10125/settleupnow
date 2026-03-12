@@ -1,9 +1,5 @@
 package com.example.settleupnow.view.composables
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,11 +11,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -27,10 +24,10 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,40 +35,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.settleupnow.R
-
-import com.example.settleupnow.view.composables.ui.theme.SettleUpNowTheme
+import androidx.navigation.NavHostController
 import com.example.settleupnow.viewmodel.AddExpencesViewModel
-import kotlin.compareTo
-
-class AddExpenseScreen : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            SettleUpNowTheme {
-                val viewModel: AddExpencesViewModel = viewModel()
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AddExpencesScreen(viewModel = viewModel)
-                }
-            }
-        }
-    }
-}
-
 
 @Composable
 fun AddExpencesScreen(
     viewModel: AddExpencesViewModel,
-    modifier: Modifier = Modifier
+    navController: NavHostController,
 ) {
     val expenceTitle by viewModel.expenceTitle.collectAsState()
     val description by viewModel.description.collectAsState()
@@ -81,6 +58,8 @@ fun AddExpencesScreen(
     val checkedList by viewModel.checkedList.collectAsState()
     val expencesList by viewModel.expencesList.collectAsState()
     val total by viewModel.total.collectAsState()
+
+    val focusRequester = remember { FocusRequester() }
 
     val hasInvalidUnequalInput = splitType == "Unequal" && expencesList.any { str ->
         str.any { char -> !char.isDigit() && char != '+' && !char.isWhitespace() }
@@ -94,23 +73,40 @@ fun AddExpencesScreen(
     var expanded by remember { mutableStateOf(false) }
     val members = List(10) { "Member ${it + 1}" }
 
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text(
-            text = "Add New Expense",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(bottom = 20.dp)
-        )
+        ) {
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back"
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Add New Expense",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
 
         Text(text = "What is this for? *", fontWeight = FontWeight.Bold)
         TextField(
             value = expenceTitle,
             onValueChange = { viewModel.expenceTitle(it) },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
             placeholder = { Text("Title") }
         )
         if (expenceTitle.isNotEmpty() && !isTitleValid) {
@@ -279,11 +275,3 @@ fun AddExpencesScreen(
         }
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun GreetingPreview7() {
-//    SettleUpNowTheme {
-//        Greeting7("Android")
-//    }
-//}
