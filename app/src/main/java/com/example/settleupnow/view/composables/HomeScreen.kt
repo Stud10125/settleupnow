@@ -6,12 +6,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.settleupnow.navigation.Routes
 
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
 
-    var footerIndex by remember { mutableStateOf(0) }
+    var footerIndex by remember { mutableStateOf(footerIndexState.value) }
+    
+    LaunchedEffect(footerIndex) {
+        footerIndexState.value = footerIndex
+    }
 
     Column(Modifier.fillMaxSize()){
         Column(Modifier.fillMaxWidth().weight(1f)) {
@@ -32,10 +37,15 @@ fun HomeScreen(navController: NavHostController) {
                     } else if (footerIndex == 2) {
                         ProfileScreen(
                             viewModel = viewModel(),
-                            onAccountClick = { },
-                            onChangePasswordClick = { },
-                            onSupportClick = { },
-                            onAboutClick = { }
+                            onAccountClick = { navController.navigate(Routes.ACCOUNT) },
+                            onChangePasswordClick = { navController.navigate(Routes.CHANGE_PASSWORD) },
+                            onSupportClick = { navController.navigate(Routes.SUPPORT) },
+                            onAboutClick = { navController.navigate(Routes.ABOUT) },
+                            onLogout = {
+                                navController.navigate(Routes.LOGIN) {
+                                    popUpTo(Routes.HOME) { inclusive = true }
+                                }
+                            }
                         )
                     }
                 }
@@ -68,4 +78,4 @@ fun HomeScreen(navController: NavHostController) {
     }
 }
 
-
+val footerIndexState = mutableStateOf(0)

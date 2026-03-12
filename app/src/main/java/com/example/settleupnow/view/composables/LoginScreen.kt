@@ -2,14 +2,26 @@ package com.example.settleupnow.view.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -24,6 +36,7 @@ fun LoginScreenUI(
 ) {
     val email by viewModel.email.collectAsState()
     val password by viewModel.password.collectAsState()
+    var passwordVisible by remember { mutableStateOf(false) }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -36,45 +49,83 @@ fun LoginScreenUI(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            // --- ATTRACTIVE LOGO SECTION ---
             Box(
                 modifier = Modifier
-                    .size(80.dp)
-                    .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(20.dp)),
+                    .size(100.dp)
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary
+                            )
+                        ),
+                        shape = RoundedCornerShape(24.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Logo", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                Icon(
+                    imageVector = Icons.Default.AccountBalanceWallet,
+                    contentDescription = "Logo",
+                    modifier = Modifier.size(50.dp),
+                    tint = Color.White
+                )
             }
 
-            Spacer(Modifier.height(40.dp))
+            Spacer(Modifier.height(16.dp))
+
+            // Stylized App Name: "SettleUp" in Bold, "Now" in Accent color
+            Text(
+                text = buildAnnotatedString {
+                    append("SettleUp")
+                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                        append("Now")
+                    }
+                },
+                fontSize = 32.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = (-1).sp
+            )
 
             Text(
-                "LOGIN",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.onBackground
+                "Split smart. Settle fast.",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(Modifier.height(30.dp))
+            Spacer(Modifier.height(48.dp))
 
+            // --- INPUT FIELDS ---
             OutlinedTextField(
                 value = email,
-                onValueChange = { viewModel.updateEmail(it) }, // call a function in ViewModel
-                label = { Text("EMAIL") },
+                onValueChange = { viewModel.updateEmail(it) },
+                label = { Text("Email Address") },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
             )
+
+            Spacer(Modifier.height(16.dp))
 
             OutlinedTextField(
                 value = password,
-                onValueChange = { viewModel.updatePassword(it) }, // call a function in ViewModel
-                label = { Text("PASSWORD") },
+                onValueChange = { viewModel.updatePassword(it) },
+                label = { Text("Password") },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    val image = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(imageVector = image, contentDescription = "Toggle password")
+                    }
+                }
             )
-
 
             Spacer(Modifier.height(32.dp))
 
+            // --- LOGIN BUTTON ---
             Button(
                 onClick = {
                     viewModel.loginUser(email, password) { success, message ->
@@ -82,27 +133,31 @@ fun LoginScreenUI(
                             navController.navigate(Routes.HOME) {
                                 popUpTo(Routes.LOGIN) { inclusive = true }
                             }
-                        } else {
-                            println("Login failed: $message")
                         }
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
-                shape = RoundedCornerShape(12.dp)
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
             ) {
-                Text("Login", fontSize = 18.sp)
+                Text("Sign In", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
 
-
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(24.dp))
 
             TextButton(onClick = onRegister) {
-                Text("New user? Register", color = MaterialTheme.colorScheme.secondary)
+                Text(
+                    text = buildAnnotatedString {
+                        append("New user? ")
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Create Account")
+                        }
+                    },
+                    color = MaterialTheme.colorScheme.secondary
+                )
             }
         }
     }
 }
-
-

@@ -1,11 +1,15 @@
 package com.example.settleupnow.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class ProfileViewModel : ViewModel() {
+    private val auth = Firebase.auth
+    
     private val _email = MutableStateFlow("")
     val email: StateFlow<String> = _email.asStateFlow()
 
@@ -31,5 +35,10 @@ class ProfileViewModel : ViewModel() {
         if (_newPassword.value == _confirmPassword.value) {
             // Logic to change password
         }
+    }
+
+    fun logout(onSuccess: () -> Unit) {
+        auth.signOut()
+        onSuccess()
     }
 }

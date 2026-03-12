@@ -7,6 +7,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.settleupnow.view.composables.*
 import com.example.settleupnow.viewmodel.*
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 object Routes {
     const val LOGIN = "login"
@@ -20,6 +22,10 @@ object Routes {
     const val SUMMARY = "summary"
     const val EDIT_EXPENSE = "edit_expense"
     const val EXPENSE_INFO = "expense_info"
+    const val ACCOUNT = "account"
+    const val CHANGE_PASSWORD = "change_password"
+    const val SUPPORT = "support"
+    const val ABOUT = "about"
 }
 
 @Composable
@@ -32,8 +38,10 @@ fun AppNavigation(
     analyticsViewModel: AnalyticsViewModel = viewModel()
 ) {
     val navController = rememberNavController()
+    val auth = Firebase.auth
+    val startDestination = if (auth.currentUser != null) Routes.HOME else Routes.LOGIN
 
-    NavHost(navController = navController, startDestination = Routes.LOGIN) {
+    NavHost(navController = navController, startDestination = startDestination) {
 
         composable(Routes.LOGIN) {
             LoginScreenUI(
@@ -99,6 +107,26 @@ fun AppNavigation(
         composable("${Routes.EDIT_EXPENSE}/{expenseId}") { backStackEntry ->
             val expenseId = backStackEntry.arguments?.getString("expenseId") ?: ""
             EditExpenseScreen(expenseId = expenseId, navController = navController)
+        }
+
+        composable(Routes.ACCOUNT) {
+            AccountScreen(navController = navController)
+        }
+
+        composable(Routes.CHANGE_PASSWORD) {
+            ChangePasswordScreen(navController = navController)
+        }
+
+        composable(Routes.SUPPORT) {
+            SupportScreen(navController = navController)
+        }
+
+        composable(Routes.ABOUT) {
+            AboutScreen(
+                navController = navController,
+                onPrivacyPolicyClick = {},
+                onTermsClick = {}
+            )
         }
     }
 }

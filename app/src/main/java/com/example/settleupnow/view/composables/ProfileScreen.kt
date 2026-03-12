@@ -11,21 +11,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavController
 import com.example.settleupnow.viewmodel.ProfileViewModel
-
-
 
 @Composable
 fun ProfileScreen(
@@ -33,7 +35,8 @@ fun ProfileScreen(
     onAccountClick: () -> Unit,
     onChangePasswordClick: () -> Unit,
     onSupportClick: () -> Unit,
-    onAboutClick: () -> Unit
+    onAboutClick: () -> Unit,
+    onLogout: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -48,9 +51,21 @@ fun ProfileScreen(
         ProfileOption("Change Password") { onChangePasswordClick() }
         ProfileOption("Support") { onSupportClick() }
         ProfileOption("About") { onAboutClick() }
+        
+        Spacer(modifier = Modifier.weight(1f))
+        
+        Button(
+            onClick = {
+                viewModel.logout {
+                    onLogout()
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Logout", color = Color.White)
+        }
     }
 }
-
 
 @Composable
 fun ProfileOption(title: String, onClick: () -> Unit) {
@@ -64,15 +79,22 @@ fun ProfileOption(title: String, onClick: () -> Unit) {
         Text(title, style = MaterialTheme.typography.bodyLarge)
     }
 }
+
 @Composable
-fun AccountScreen() {
+fun AccountScreen(navController: NavController) {
     Column(Modifier.fillMaxSize().statusBarsPadding().padding(16.dp)) {
+        IconButton(onClick = { navController.popBackStack() }) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back"
+            )
+        }
         Text("Account Screen", style = MaterialTheme.typography.headlineMedium)
     }
 }
 
 @Composable
-fun ChangePasswordScreen(viewModel: ProfileViewModel = viewModel()) {
+fun ChangePasswordScreen(navController: NavController, viewModel: ProfileViewModel = viewModel()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -81,7 +103,15 @@ fun ChangePasswordScreen(viewModel: ProfileViewModel = viewModel()) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        Text("Change Password", style = MaterialTheme.typography.headlineMedium)
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back"
+                )
+            }
+            Text("Change Password", style = MaterialTheme.typography.headlineMedium)
+        }
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -109,25 +139,28 @@ fun ChangePasswordScreen(viewModel: ProfileViewModel = viewModel()) {
         Button(
             onClick = {  },
             modifier = Modifier.width(170.dp),
-//            enabled = viewModel.email.isNotBlank() &&
-//                    viewModel.newPassword.isNotBlank() &&
-//                    viewModel.confirmPassword.isNotBlank()
         ) {
             Text("Change Password")
         }
     }
 }
 
-
 @Composable
-fun SupportScreen() {
+fun SupportScreen(navController: NavController) {
     Column(Modifier.fillMaxSize().statusBarsPadding().padding(16.dp)) {
+        IconButton(onClick = { navController.popBackStack() }) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back"
+            )
+        }
         Text("Support Screen", style = MaterialTheme.typography.headlineMedium)
     }
 }
 
 @Composable
 fun AboutScreen(
+    navController: NavController,
     developerName: String = "Your Team",
     onPrivacyPolicyClick: () -> Unit,
     onTermsClick: () -> Unit
@@ -139,6 +172,12 @@ fun AboutScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        IconButton(onClick = { navController.popBackStack() }) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back"
+            )
+        }
         Text("About", style = MaterialTheme.typography.headlineMedium)
 
         Text("SettleUpNow", style = MaterialTheme.typography.titleMedium)
@@ -172,33 +211,4 @@ fun AboutScreen(
             Text("Terms of Service", style = MaterialTheme.typography.bodyLarge)
         }
     }
-}
-
-
-@Composable
-fun AppNavigation(){
-    val navController= rememberNavController()
-    NavHost(navController = navController, startDestination = "profile") {
-        composable("profile") {
-            ProfileScreen(
-                viewModel = viewModel(),
-                onAccountClick = { navController.navigate("account") },
-                onChangePasswordClick = { navController.navigate("changePassword") },
-                onSupportClick = { navController.navigate("support") },
-                onAboutClick = { navController.navigate("about") }
-            )
-        }
-
-        composable("account") { AccountScreen() }
-        composable("changePassword") { ChangePasswordScreen() }
-        composable("support") { SupportScreen() }
-        composable("about") {
-            AboutScreen(
-                developerName = "SettleUpNow Team",
-                onPrivacyPolicyClick = { },
-                onTermsClick = { }
-            )
-        }
-    }
-
 }

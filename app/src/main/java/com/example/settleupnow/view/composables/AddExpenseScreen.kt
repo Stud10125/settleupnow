@@ -260,14 +260,14 @@ fun AddExpencesScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (!isFormValid) {
-            Text(
-                text = "Please fix the errors or fill required fields.",
-                color = Color.Red,
-                fontSize = 12.sp,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-        }
+//        if (!isFormValid) {
+//            Text(
+//                text = "Please fix the errors or fill required fields.",
+//                color = Color.Red,
+//                fontSize = 12.sp,
+//                modifier = Modifier.align(Alignment.CenterHorizontally)
+//            )
+//        }
 
         Button(
             onClick = { 
