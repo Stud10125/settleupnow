@@ -12,16 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SettleUpNow">
         <activity
-            android:name=".view.composables.LoginScreen"
-            android:exported="true"
-            android:label="@string/title_activity_login_screen"
-            android:theme="@style/Theme.SettleUpNow" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:name=".view.composables.MemberActivity"
+            android:exported="false"
+            android:label="@string/title_activity_member"
+            android:theme="@style/Theme.SettleUpNow" />
         <activity
             android:name=".view.composables.SummaryScreen"
             android:exported="false"
@@ -35,9 +29,9 @@
         </activity>
         <activity
             android:name=".view.composables.ProfileScreen"
-            android:exported="true"
+            android:exported="false"
             android:label="@string/title_activity_profile_screen"
-            android:theme="@style/Theme.SettleUpNow"></activity>
+            android:theme="@style/Theme.SettleUpNow" />
         <activity
             android:name=".view.composables.GroupDetailsScreen"
             android:exported="false"
@@ -45,38 +39,24 @@
             android:theme="@style/Theme.SettleUpNow" />
         <activity
             android:name=".view.composables.AddGroupScreen"
-            android:exported="true"
+            android:exported="false"
             android:label="@string/title_activity_add_group_screen"
-            android:theme="@style/Theme.SettleUpNow">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/Theme.SettleUpNow" />
         <activity
             android:name=".view.composables.RegisterScreen"
-            android:exported="true"
+            android:exported="false"
             android:label="@string/title_activity_register_screen"
-            android:theme="@style/Theme.SettleUpNow">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/Theme.SettleUpNow" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.SettleUpNow">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 
