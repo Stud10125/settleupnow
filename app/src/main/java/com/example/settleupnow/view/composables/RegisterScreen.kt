@@ -1,9 +1,5 @@
 package com.example.settleupnow.view.composables
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -13,32 +9,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.settleupnow.view.composables.ui.theme.SettleUpNowTheme
 import com.example.settleupnow.viewmodel.RegisterViewModel
-
-class RegisterScreen : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            SettleUpNowTheme {
-                val viewModel: RegisterViewModel = viewModel()
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    RegisterScreenUI(
-                        viewModel = viewModel,
-                        onLogin={},
-                    )
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun RegisterScreenUI(
-    onLogin: () -> Unit,
-    viewModel: RegisterViewModel
+    viewModel: RegisterViewModel,
+    onLogin: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),

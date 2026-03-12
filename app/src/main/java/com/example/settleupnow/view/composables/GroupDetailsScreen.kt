@@ -38,39 +38,17 @@ import com.example.settleupnow.view.composables.ui.theme.SettleUpNowTheme
 import com.example.settleupnow.viewmodel.GroupDetailUiState
 import com.example.settleupnow.viewmodel.GroupDetailViewModel
 import androidx.compose.foundation.lazy.items
+import androidx.navigation.NavController
 import com.example.settleupnow.viewmodel.MemberActivityViewModel
 
-class GroupDetailsScreen : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        val groupName = intent.getStringExtra("groupName") ?: "Group"
-        setContent {
-            SettleUpNowTheme {
-                val vm: GroupDetailViewModel = viewModel(
-                    factory = GroupDetailViewModel.Factory(groupName)
-                )
-                val state by vm.uiState.collectAsState()
-
-                GroupDetailScreen(
-                    state = state,
-                    onAddExpense = { title, amount -> vm.addExpense(title, amount) },
-                    onBack = { finish() }
-                )
-            }
-        }
-    }
-}
 
 @Composable
-private fun GroupDetailScreen(
-    state: GroupDetailUiState,
-    onAddExpense: (String, Int) -> Unit,
+fun GroupDetailScreen(
+    navController: NavController,
+    vm: GroupDetailViewModel,
     onBack: () -> Unit
 ) {
-    val context = LocalContext.current
-    var newTitle by remember { mutableStateOf("") }
-    var newAmount by remember { mutableStateOf("") }
+    val state by vm.uiState.collectAsState()
     var showBalance by remember { mutableStateOf(false) }
 
     BackHandler { onBack() }
@@ -82,45 +60,20 @@ private fun GroupDetailScreen(
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
-
             Text(
                 text = "(Inside group screen)\n${state.groupName}",
                 fontSize = 20.sp,
-                lineHeight = 22.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
-
-                    .clickable{
-                        val intent = Intent(context, MemberActivity::class.java)
-                            .apply { putExtra("groupName", state.groupName) }
-                        context.startActivity(intent)
-                    }
             )
 
             Spacer(Modifier.height(16.dp))
 
-            // Header row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Title", fontWeight = FontWeight.SemiBold)
-                Text("Amount", fontWeight = FontWeight.SemiBold)
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
+            LazyColumn(modifier = Modifier.weight(1f)) {
                 items(state.expenses) { e ->
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(e.title)
@@ -129,8 +82,6 @@ private fun GroupDetailScreen(
                 }
             }
 
-
-
             Spacer(Modifier.height(10.dp))
 
             Row(
@@ -138,15 +89,7 @@ private fun GroupDetailScreen(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 OutlinedButton(
-                    onClick = {
-                        val title = newTitle.trim()
-                        val amt = newAmount.trim().toIntOrNull()
-                        if (title.isNotEmpty() && amt != null && amt >= 0) {
-                            onAddExpense(title, amt)
-                            newTitle = ""
-                            newAmount = ""
-                        }
-                    },
+                    onClick = { navController.navigate(Routes.ADD_EXPENSE) },
                     modifier = Modifier.weight(1f)
                 ) { Text("Add Exp") }
 
@@ -154,24 +97,12 @@ private fun GroupDetailScreen(
                     onClick = { showBalance = !showBalance },
                     modifier = Modifier.weight(1f)
                 ) { Text("Balance") }
-
-                OutlinedButton(
-                    onClick = { /* Add member – optional */ },
-                    modifier = Modifier.weight(1f)
-                ) { Text("Add M") }
             }
 
             if (showBalance) {
-                Spacer(Modifier.height(8.dp))
                 val sum = state.expenses.sumOf { it.amount }
-                Text(
-                    text = "Total Balance: ₹$sum",
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
+                Text("Total Balance: ₹$sum")
             }
-
-            Spacer(Modifier.height(8.dp))
 
             OutlinedButton(
                 onClick = onBack,

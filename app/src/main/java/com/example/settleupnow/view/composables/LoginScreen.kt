@@ -1,57 +1,24 @@
 package com.example.settleupnow.view.composables
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.myapplication.LoginViewModel
-import com.example.settleupnow.view.composables.ui.theme.SettleUpNowTheme
 
-class LoginScreen : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            SettleUpNowTheme {
-                val viewModel: LoginViewModel = viewModel()
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LoginScreenUI(onRegister = {},
-                        viewModel = viewModel)
-                }
-            }
-        }
-    }
-}
 @Composable
 fun LoginScreenUI(
+    navController: NavController,
     onRegister: () -> Unit,
-    viewModel: LoginViewModel) {
+    viewModel: LoginViewModel
+) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -95,7 +62,7 @@ fun LoginScreenUI(
 
             OutlinedTextField(
                 value = viewModel.password.value,
-                onValueChange = { viewModel.loginUser() },
+                onValueChange = { viewModel.password.value = it },
                 label = { Text("PASSWORD") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
@@ -104,7 +71,12 @@ fun LoginScreenUI(
             Spacer(Modifier.height(32.dp))
 
             Button(
-                onClick = { viewModel.loginUser() },
+                onClick = {
+                    viewModel.loginUser()
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
