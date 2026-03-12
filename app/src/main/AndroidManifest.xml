@@ -25,7 +25,8 @@
             android:name=".view.composables.AddExpenseScreen"
             android:exported="false"
             android:label="@string/title_activity_add_expense_screen"
-            android:theme="@style/Theme.SettleUpNow" />
+            android:theme="@style/Theme.SettleUpNow" >
+        </activity>
         <activity
             android:name=".view.composables.ProfileScreen"
             android:exported="false"
