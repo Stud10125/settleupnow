@@ -37,6 +37,12 @@ class AddGroupViewModel(private val repository: FirebaseRepository = FirebaseRep
         _members.value = _members.value.filter { it.userId != user.userId }
     }
 
+    fun clearData() {
+        _groupName.value = ""
+        _description.value = ""
+        _members.value = emptyList()
+    }
+
     fun addMemberByEmail(email: String, onResult: (Boolean, String) -> Unit) {
         viewModelScope.launch {
             try {
@@ -71,6 +77,9 @@ class AddGroupViewModel(private val repository: FirebaseRepository = FirebaseRep
                 description = _description.value,
                 members = _members.value
             )
+            if (success) {
+                clearData()
+            }
             onResult(success, message)
         }
     }

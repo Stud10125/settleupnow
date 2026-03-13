@@ -97,6 +97,16 @@ class AddExpencesViewModel(private val repository: FirebaseRepository = Firebase
         _total.value = sum
     }
 
+    fun clearData() {
+        _expenceTitle.value = ""
+        _description.value = ""
+        _splitType.value = "Equal"
+        _amount.value = ""
+        _total.value = 0
+        _expencesList.value = List(_members.value.size) { "" }
+        _checkedList.value = List(_members.value.size) { true }
+    }
+
     fun saveExpense(onResult: (Boolean, String) -> Unit) {
         val title = _expenceTitle.value
         val totalAmountStr = if (_splitType.value == "Equal") _amount.value else _total.value.toString()
@@ -129,6 +139,9 @@ class AddExpencesViewModel(private val repository: FirebaseRepository = Firebase
                 paidByName = _paidBy.value,
                 participants = participants
             )
+            if (success) {
+                clearData()
+            }
             onResult(success, message)
         }
     }

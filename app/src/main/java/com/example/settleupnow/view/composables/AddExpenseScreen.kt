@@ -89,7 +89,10 @@ fun AddExpencesScreen(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(bottom = 20.dp)
         ) {
-            IconButton(onClick = { navController.popBackStack() }) {
+            IconButton(onClick = { 
+                viewModel.clearData()
+                navController.popBackStack() 
+            }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back"
@@ -265,6 +268,7 @@ fun AddExpencesScreen(
                 viewModel.saveExpense { success, message ->
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                     if (success) {
+                        viewModel.clearData()
                         navController.popBackStack()
                     }
                 }

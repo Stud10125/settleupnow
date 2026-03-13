@@ -18,7 +18,7 @@ class HomePageViewModel(private val repository: FirebaseRepository = FirebaseRep
         fetchUserGroups()
     }
 
-    private fun fetchUserGroups() {
+    fun fetchUserGroups() {
         viewModelScope.launch {
             val groupList = repository.getUserGroups()
             _groups.value = groupList

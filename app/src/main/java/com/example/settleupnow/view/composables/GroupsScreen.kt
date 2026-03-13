@@ -27,6 +27,10 @@ fun GroupsScreen(
 ) {
     val groups by viewModel.groups.collectAsState()
 
+    LaunchedEffect(Unit) {
+        viewModel.fetchUserGroups()
+    }
+
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text(
             text = "Groups",
@@ -62,7 +66,6 @@ fun GroupsScreen(
                                 color = Color(0xFFE3F2FD),
                                 shape = RoundedCornerShape(10.dp)
                             )
-                            // ✅ Pass groupId when navigating
                             .clickable { navController.navigate("${Routes.GROUP_DATA}/${group.id}") }
                             .padding(16.dp),
                         contentAlignment = Alignment.CenterStart

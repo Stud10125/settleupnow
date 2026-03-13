@@ -53,7 +53,10 @@ fun AddGroupScreen(
                     Text("Create")
                 }
                 OutlinedButton(
-                    onClick = { navController.popBackStack() },
+                    onClick = { 
+                        viewModel.clearData()
+                        navController.popBackStack() 
+                    },
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("Cancel")
@@ -130,7 +133,6 @@ fun AddGroupScreen(
         }
     }
 
-    // Dialog for adding member
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
