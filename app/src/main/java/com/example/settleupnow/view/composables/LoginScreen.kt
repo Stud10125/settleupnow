@@ -2,7 +2,6 @@ package com.example.settleupnow.view.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
@@ -74,7 +73,6 @@ fun LoginScreenUI(
 
             Spacer(Modifier.height(16.dp))
 
-            // Stylized App Name: "SettleUp" in Bold, "Now" in Accent color
             Text(
                 text = buildAnnotatedString {
                     append("SettleUp")
@@ -95,7 +93,6 @@ fun LoginScreenUI(
 
             Spacer(Modifier.height(48.dp))
 
-            // --- INPUT FIELDS ---
             OutlinedTextField(
                 value = email,
                 onValueChange = { viewModel.updateEmail(it) },
@@ -125,7 +122,6 @@ fun LoginScreenUI(
 
             Spacer(Modifier.height(32.dp))
 
-            // --- LOGIN BUTTON ---
             Button(
                 onClick = {
                     viewModel.loginUser(email, password) { success, message ->

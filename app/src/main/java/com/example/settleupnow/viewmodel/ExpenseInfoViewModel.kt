@@ -20,8 +20,7 @@ class ExpenseInfoViewModel(private val repository: FirebaseRepository = Firebase
         viewModelScope.launch {
             val (exp, participantMap) = repository.getExpenseDetails(expenseId)
             _expense.value = exp
-            
-            // Map User IDs to Names for display
+
             if (exp != null) {
                 val members = repository.getGroupMembers(exp.groupId)
                 val nameMap = mutableMapOf<String, Int>()

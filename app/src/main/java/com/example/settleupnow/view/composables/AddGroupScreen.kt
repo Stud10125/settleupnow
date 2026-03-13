@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.settleupnow.model.User
 import com.example.settleupnow.viewmodel.AddGroupViewModel
 
 @Composable

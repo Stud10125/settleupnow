@@ -14,11 +14,9 @@ class EditExpenseViewModel(private val repository: FirebaseRepository = Firebase
     private val _expense = MutableStateFlow<Expense?>(null)
     val expense: StateFlow<Expense?> = _expense.asStateFlow()
 
-    // Map of Name -> String Amount for UI
     private val _editedSplits = MutableStateFlow<Map<String, String>>(emptyMap())
     val editedSplits: StateFlow<Map<String, String>> = _editedSplits.asStateFlow()
 
-    // Map of Name -> UserId for reverse mapping
     private var memberNameToId = mutableMapOf<String, String>()
 
     fun loadExpense(expenseId: String) {

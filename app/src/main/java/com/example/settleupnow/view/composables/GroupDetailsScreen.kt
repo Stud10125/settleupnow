@@ -49,7 +49,6 @@ fun GroupDetailScreen(
         viewModel.fetchGroup(groupId)
     }
 
-    // Modern Dialog Styling
     if (showAddMemberDialog) {
         AlertDialog(
             onDismissRequest = { showAddMemberDialog = false },
@@ -150,7 +149,6 @@ fun GroupDetailScreen(
                 }
             }
 
-            // --- ACTION BUTTONS ---
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -176,7 +174,6 @@ fun GroupDetailScreen(
                 }
             }
 
-            // --- EXPENSES LIST ---
             Text(
                 "Recent Activity",
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),

@@ -22,16 +22,13 @@ class GroupDetailsViewModel(private val repository: FirebaseRepository = Firebas
     fun fetchGroup(groupId: String) {
         viewModelScope.launch {
             try {
-                // Fetch group name
                 val db = FirebaseDatabase.getInstance().reference
                 val snapshot = db.child("groups").child(groupId).child("groupName").get().await()
                 _groupName.value = snapshot.value as? String ?: ""
 
-                // Fetch expenses
                 val expenseList = repository.getGroupExpenses(groupId)
                 _expenses.value = expenseList
             } catch (e: Exception) {
-                // Handle errors if necessary
             }
         }
     }

@@ -1,6 +1,5 @@
 package com.example.settleupnow.view.composables
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,7 +38,6 @@ fun AnalyticsScreen(
         
         Spacer(Modifier.height(20.dp))
 
-        // Total Overview Card
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(

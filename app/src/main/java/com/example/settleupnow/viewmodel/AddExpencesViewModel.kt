@@ -26,8 +26,7 @@ class AddExpencesViewModel(private val repository: FirebaseRepository = Firebase
 
     private val _paidBy = MutableStateFlow("")
     val paidBy: StateFlow<String> = _paidBy
-    
-    // Store the actual user ID of the payer
+
     private var paidByUserId: String = ""
 
     private val _members = MutableStateFlow<List<User>>(emptyList())

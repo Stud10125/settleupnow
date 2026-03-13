@@ -30,7 +30,7 @@ import com.example.settleupnow.viewmodel.GroupInfoViewModel
 @Composable
 fun GroupInfoScreen(
     groupId: String, 
-    navController: NavController, // Added NavController
+    navController: NavController,
     viewModel: GroupInfoViewModel = viewModel()
 ) {
     val members by viewModel.members.collectAsState()
