@@ -7,10 +7,10 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.settleupnow.navigation.Routes
-
+import com.example.settleupnow.viewmodel.LoginViewModel
 
 @Composable
-fun HomeScreen(navController: NavHostController) {
+fun HomeScreen(navController: NavHostController, viewModel: LoginViewModel) {
 
     var footerIndex by remember { mutableStateOf(footerIndexState.value) }
     
@@ -37,11 +37,10 @@ fun HomeScreen(navController: NavHostController) {
                     } else if (footerIndex == 2) {
                         ProfileScreen(
                             viewModel = viewModel(),
-                            onAccountClick = { navController.navigate(Routes.ACCOUNT) },
-                            onChangePasswordClick = { navController.navigate(Routes.CHANGE_PASSWORD) },
-                            onSupportClick = { navController.navigate(Routes.SUPPORT) },
                             onAboutClick = { navController.navigate(Routes.ABOUT) },
                             onLogout = {
+                                viewModel.updateEmail("")
+                                viewModel.updatePassword("")
                                 navController.navigate(Routes.LOGIN) {
                                     popUpTo(Routes.HOME) { inclusive = true }
                                 }

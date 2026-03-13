@@ -22,9 +22,6 @@ object Routes {
     const val SUMMARY = "summary"
     const val EDIT_EXPENSE = "edit_expense"
     const val EXPENSE_INFO = "expense_info"
-    const val ACCOUNT = "account"
-    const val CHANGE_PASSWORD = "change_password"
-    const val SUPPORT = "support"
     const val ABOUT = "about"
 }
 
@@ -64,7 +61,8 @@ fun AppNavigation(
 
         composable(Routes.HOME) {
             HomeScreen(
-                navController = navController
+                navController = navController,
+                viewModel = loginViewModel
             )
         }
 
@@ -109,23 +107,9 @@ fun AppNavigation(
             EditExpenseScreen(expenseId = expenseId, navController = navController)
         }
 
-        composable(Routes.ACCOUNT) {
-            AccountScreen(navController = navController)
-        }
-
-        composable(Routes.CHANGE_PASSWORD) {
-            ChangePasswordScreen(navController = navController)
-        }
-
-        composable(Routes.SUPPORT) {
-            SupportScreen(navController = navController)
-        }
-
         composable(Routes.ABOUT) {
             AboutScreen(
-                navController = navController,
-                onPrivacyPolicyClick = {},
-                onTermsClick = {}
+                navController = navController
             )
         }
     }
