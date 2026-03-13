@@ -1,9 +1,11 @@
 package com.example.settleupnow.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.settleupnow.Repository.FirebaseRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
 
@@ -22,7 +24,8 @@ class LoginViewModel : ViewModel() {
     }
 
     fun loginUser(email: String, password: String, onResult: (Boolean, String) -> Unit) {
-        repo.login(email, password) { success, message ->
+        viewModelScope.launch {
+            val (success, message) = repo.login(email, password)
             onResult(success, message)
         }
     }

@@ -1,11 +1,13 @@
 package com.example.settleupnow.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.settleupnow.Repository.FirebaseRepository
 import com.example.settleupnow.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class AddExpencesViewModel(private val repository: FirebaseRepository = FirebaseRepository()) : ViewModel() {
     private var groupId: String = ""
@@ -46,7 +48,8 @@ class AddExpencesViewModel(private val repository: FirebaseRepository = Firebase
     }
 
     private fun fetchMembers() {
-        repository.getGroupMembers(groupId) { memberList ->
+        viewModelScope.launch {
+            val memberList = repository.getGroupMembers(groupId)
             _members.value = memberList
             _checkedList.value = List(memberList.size) { true }
             _expencesList.value = List(memberList.size) { "" }
@@ -97,7 +100,8 @@ class AddExpencesViewModel(private val repository: FirebaseRepository = Firebase
 
     fun saveExpense(onResult: (Boolean, String) -> Unit) {
         val title = _expenceTitle.value
-        val totalAmount = if (_splitType.value == "Equal") _amount.value.toIntOrNull() ?: 0 else _total.value
+        val totalAmountStr = if (_splitType.value == "Equal") _amount.value else _total.value.toString()
+        val totalAmount = totalAmountStr.toIntOrNull() ?: 0
         
         val participants = mutableMapOf<String, Int>()
         
@@ -117,14 +121,16 @@ class AddExpencesViewModel(private val repository: FirebaseRepository = Firebase
 
         if (participants.isEmpty()) return onResult(false, "No participants in expense")
 
-        repository.addExpense(
-            groupId = groupId,
-            title = title,
-            amount = totalAmount,
-            paidBy = paidByUserId,
-            paidByName = _paidBy.value, // Added passing name
-            participants = participants,
-            onResult = onResult
-        )
+        viewModelScope.launch {
+            val (success, message) = repository.addExpense(
+                groupId = groupId,
+                title = title,
+                amount = totalAmount,
+                paidBy = paidByUserId,
+                paidByName = _paidBy.value,
+                participants = participants
+            )
+            onResult(success, message)
+        }
     }
 }

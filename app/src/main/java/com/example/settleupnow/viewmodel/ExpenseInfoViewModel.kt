@@ -1,11 +1,13 @@
 package com.example.settleupnow.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.settleupnow.Repository.FirebaseRepository
 import com.example.settleupnow.model.Expense
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class ExpenseInfoViewModel(private val repository: FirebaseRepository = FirebaseRepository()) : ViewModel() {
     private val _expense = MutableStateFlow<Expense?>(null)
@@ -15,19 +17,19 @@ class ExpenseInfoViewModel(private val repository: FirebaseRepository = Firebase
     val participantAmounts: StateFlow<Map<String, Int>> = _participantAmounts.asStateFlow()
 
     fun loadExpense(expenseId: String) {
-        repository.getExpenseDetails(expenseId) { exp, participantMap ->
+        viewModelScope.launch {
+            val (exp, participantMap) = repository.getExpenseDetails(expenseId)
             _expense.value = exp
             
             // Map User IDs to Names for display
             if (exp != null) {
-                repository.getGroupMembers(exp.groupId) { members ->
-                    val nameMap = mutableMapOf<String, Int>()
-                    participantMap.forEach { (uid, amount) ->
-                        val userName = members.find { it.userId == uid }?.name ?: "Unknown"
-                        nameMap[userName] = amount
-                    }
-                    _participantAmounts.value = nameMap
+                val members = repository.getGroupMembers(exp.groupId)
+                val nameMap = mutableMapOf<String, Int>()
+                participantMap.forEach { (uid, amount) ->
+                    val userName = members.find { it.userId == uid }?.name ?: "Unknown"
+                    nameMap[userName] = amount
                 }
+                _participantAmounts.value = nameMap
             }
         }
     }

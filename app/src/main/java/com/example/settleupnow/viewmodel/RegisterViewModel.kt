@@ -2,7 +2,9 @@ package com.example.settleupnow.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.settleupnow.Repository.FirebaseRepository
+import kotlinx.coroutines.launch
 
 class RegisterViewModel : ViewModel() {
     private val repo = FirebaseRepository()
@@ -25,6 +27,9 @@ class RegisterViewModel : ViewModel() {
         name: String,
         onResult: (Boolean, String) -> Unit
     ) {
-        repo.register(email, password, name, onResult)
+        viewModelScope.launch {
+            val (success, message) = repo.register(email, password, name)
+            onResult(success, message)
+        }
     }
 }

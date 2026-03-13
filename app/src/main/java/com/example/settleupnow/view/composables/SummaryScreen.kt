@@ -5,10 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.settleupnow.viewmodel.SimplifiedTransaction
 import com.example.settleupnow.viewmodel.SummaryViewModel
 
 @Composable
@@ -27,9 +25,55 @@ fun SummaryScreen(
     viewModel: SummaryViewModel = viewModel()
 ) {
     val balances by viewModel.balances.collectAsState()
+    var showSimplifyPopup by remember { mutableStateOf(false) }
+    var simplifiedTransactions by remember { mutableStateOf<List<SimplifiedTransaction>>(emptyList()) }
 
     LaunchedEffect(groupId) {
         viewModel.loadSummary(groupId)
+    }
+
+    if (showSimplifyPopup) {
+        AlertDialog(
+            onDismissRequest = { showSimplifyPopup = false },
+            title = { Text("Simplified Settlements") },
+            text = {
+                if (simplifiedTransactions.isEmpty()) {
+                    Text("No settlements needed!")
+                } else {
+                    LazyColumn {
+                        items(simplifiedTransactions) { transaction ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Text(
+                                        text = "${transaction.from} pays ${transaction.to}",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        text = "Amount: ₹${String.format("%.2f", transaction.amount)}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showSimplifyPopup = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 
     Column(
@@ -102,6 +146,20 @@ fun SummaryScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
+            onClick = {
+                simplifiedTransactions = viewModel.getSimplifiedTransactions()
+                showSimplifyPopup = true
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+        ) {
+            Text(text = "Simplify")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedButton(
             onClick = { navController.popBackStack() },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)

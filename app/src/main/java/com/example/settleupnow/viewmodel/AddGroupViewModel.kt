@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.example.settleupnow.model.User
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class AddGroupViewModel(private val repository: FirebaseRepository = FirebaseRepository()) : ViewModel() {
     private val _groupName = MutableStateFlow("")
@@ -37,12 +38,14 @@ class AddGroupViewModel(private val repository: FirebaseRepository = FirebaseRep
     }
 
     fun addMemberByEmail(email: String, onResult: (Boolean, String) -> Unit) {
-        val db = com.google.firebase.database.FirebaseDatabase.getInstance().reference
-        db.child("users").orderByChild("email").equalTo(email).get()
-            .addOnSuccessListener { snapshot ->
+        viewModelScope.launch {
+            try {
+                val db = com.google.firebase.database.FirebaseDatabase.getInstance().reference
+                val snapshot = db.child("users").orderByChild("email").equalTo(email).get().await()
+                
                 if (snapshot.exists()) {
                     val userSnapshot = snapshot.children.first()
-                    val uid = userSnapshot.key ?: return@addOnSuccessListener
+                    val uid = userSnapshot.key ?: throw Exception("User key missing")
                     val name = userSnapshot.child("name").value as? String ?: ""
                     val user = User(uid, name, email)
                     addMember(user)
@@ -50,10 +53,10 @@ class AddGroupViewModel(private val repository: FirebaseRepository = FirebaseRep
                 } else {
                     onResult(false, "User not found")
                 }
+            } catch (e: Exception) {
+                onResult(false, e.message ?: "Error")
             }
-            .addOnFailureListener {
-                onResult(false, it.message ?: "Error")
-            }
+        }
     }
 
     fun createGroup(onResult: (Boolean, String) -> Unit) {
@@ -62,11 +65,13 @@ class AddGroupViewModel(private val repository: FirebaseRepository = FirebaseRep
             return
         }
         
-        repository.createGroup(
-            name = _groupName.value,
-            description = _description.value,
-            members = _members.value,
-            onResult = onResult
-        )
+        viewModelScope.launch {
+            val (success, message) = repository.createGroup(
+                name = _groupName.value,
+                description = _description.value,
+                members = _members.value
+            )
+            onResult(success, message)
+        }
     }
 }

@@ -5,9 +5,11 @@ import com.example.settleupnow.model.Group
 import com.example.settleupnow.model.Expense
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 
 class FirebaseRepository {
 
@@ -16,144 +18,104 @@ class FirebaseRepository {
 
     fun getCurrentUserId(): String? = auth.currentUser?.uid
 
-    fun register(email: String, password: String, name: String, onResult: (Boolean, String) -> Unit) {
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val uid = auth.currentUser?.uid ?: return@addOnCompleteListener
-                    val userMap = mapOf(
-                        "userId" to uid,
-                        "name" to name,
-                        "email" to email
+    suspend fun register(email: String, password: String, name: String): Pair<Boolean, String> {
+        return try {
+            val result = auth.createUserWithEmailAndPassword(email, password).await()
+            val uid = result.user?.uid ?: return Pair(false, "User creation failed")
+            val userMap = mapOf(
+                "userId" to uid,
+                "name" to name,
+                "email" to email
+            )
+            db.child("users").child(uid).setValue(userMap).await()
+            Pair(true, "Registration successful")
+        } catch (e: Exception) {
+            Pair(false, e.message ?: "Registration failed")
+        }
+    }
+
+    suspend fun login(email: String, password: String): Pair<Boolean, String> {
+        return try {
+            auth.signInWithEmailAndPassword(email, password).await()
+            Pair(true, "Login success")
+        } catch (e: Exception) {
+            Pair(false, e.message ?: "Login failed")
+        }
+    }
+
+    suspend fun getUserGroups(): List<Group> = withContext(Dispatchers.IO) {
+        val uid = getCurrentUserId() ?: return@withContext emptyList()
+        try {
+            val snapshot = db.child("userGroups").child(uid).get().await()
+            val groupIds = snapshot.children.mapNotNull { it.key }
+            if (groupIds.isEmpty()) return@withContext emptyList()
+
+            groupIds.map { groupId ->
+                async {
+                    val groupSnap = db.child("groups").child(groupId).get().await()
+                    Group(
+                        id = groupSnap.key ?: "",
+                        groupName = groupSnap.child("groupName").value as? String 
+                            ?: groupSnap.child("name").value as? String ?: "Unnamed Group",
+                        description = groupSnap.child("description").value as? String ?: ""
                     )
-                    db.child("users").child(uid).setValue(userMap)
-                    onResult(true, "Registration successful")
-                } else {
-                    onResult(false, task.exception?.message ?: "Registration failed")
                 }
-            }
+            }.awaitAll()
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
-    fun login(email: String, password: String, onResult: (Boolean, String) -> Unit) {
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener {
-                if (it.isSuccessful)
-                    onResult(true, "Login success")
-                else
-                    onResult(false, "Login failed")
-            }
-    }
-
-    fun getUserGroups(onGroupsLoaded: (List<Group>) -> Unit) {
-        val uid = getCurrentUserId() ?: return onGroupsLoaded(emptyList())
-
-        db.child("userGroups").child(uid).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val groupIds = snapshot.children.mapNotNull { it.key }
-                if (groupIds.isEmpty()) {
-                    onGroupsLoaded(emptyList())
-                    return
-                }
-
-                val loadedGroups = mutableListOf<Group>()
-                var count = 0
-                for (groupId in groupIds) {
-                    db.child("groups").child(groupId).get().addOnSuccessListener { groupSnap ->
-                        val group = Group(
-                            id = groupSnap.key ?: "",
-                            groupName = groupSnap.child("groupName").value as? String 
-                                ?: groupSnap.child("name").value as? String ?: "Unnamed Group",
-                            description = groupSnap.child("description").value as? String ?: ""
-                        )
-                        loadedGroups.add(group)
-                        count++
-                        if (count == groupIds.size) {
-                            onGroupsLoaded(loadedGroups)
-                        }
-                    }
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                onGroupsLoaded(emptyList())
-            }
-        })
-    }
-
-    fun getGroupMembers(groupId: String, onResult: (List<User>) -> Unit) {
-        db.child("groupMembers").child(groupId).get().addOnSuccessListener { snapshot ->
+    suspend fun getGroupMembers(groupId: String): List<User> = withContext(Dispatchers.IO) {
+        try {
+            val snapshot = db.child("groupMembers").child(groupId).get().await()
             val memberIds = snapshot.children.mapNotNull { it.key }
-            if (memberIds.isEmpty()) {
-                onResult(emptyList())
-                return@addOnSuccessListener
-            }
+            if (memberIds.isEmpty()) return@withContext emptyList()
 
-            val users = mutableListOf<User>()
-            var count = 0
-            memberIds.forEach { userId ->
-                db.child("users").child(userId).get().addOnSuccessListener { userSnap ->
+            memberIds.map { userId ->
+                async {
+                    val userSnap = db.child("users").child(userId).get().await()
                     val email = userSnap.child("email").value as? String ?: ""
                     val name = userSnap.child("name").value as? String 
                         ?: userSnap.child("displayName").value as? String
                         ?: email.substringBefore("@").ifEmpty { "Member" }
                     
-                    val user = User(
-                        userId = userId,
-                        name = name,
-                        email = email
-                    )
-                    users.add(user)
-                    count++
-                    if (count == memberIds.size) onResult(users)
-                }.addOnFailureListener {
-                    count++
-                    if (count == memberIds.size) onResult(users)
+                    User(userId = userId, name = name, email = email)
                 }
-            }
-        }.addOnFailureListener {
-            onResult(emptyList())
+            }.awaitAll()
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 
-    fun getGroupExpenses(groupId: String, onResult: (List<Expense>) -> Unit) {
-        db.child("groupExpenses").child(groupId).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val expenseIds = snapshot.children.mapNotNull { it.key }
-                if (expenseIds.isEmpty()) {
-                    onResult(emptyList())
-                    return
-                }
+    suspend fun getGroupExpenses(groupId: String): List<Expense> = withContext(Dispatchers.IO) {
+        try {
+            val snapshot = db.child("groupExpenses").child(groupId).get().await()
+            val expenseIds = snapshot.children.mapNotNull { it.key }
+            if (expenseIds.isEmpty()) return@withContext emptyList()
 
-                val expenses = mutableListOf<Expense>()
-                var count = 0
-                expenseIds.forEach { id ->
-                    db.child("expenses").child(id).get().addOnSuccessListener { snap ->
-                        val expense = Expense(
-                            expenseId = snap.key ?: "",
-                            groupId = snap.child("groupId").value as? String ?: "",
-                            title = snap.child("title").value as? String ?: "",
-                            amount = (snap.child("amount").value as? Long)?.toInt() ?: 0,
-                            paidBy = snap.child("paidBy").value as? String ?: "",
-                            paidByName = snap.child("paidByName").value as? String ?: "Unknown"
-                        )
-                        expenses.add(expense)
-                        count++
-                        if (count == expenseIds.size) {
-                            onResult(expenses.sortedByDescending { it.expenseId })
-                        }
-                    }.addOnFailureListener {
-                        count++
-                        if (count == expenseIds.size) onResult(expenses)
-                    }
+            expenseIds.map { id ->
+                async {
+                    val snap = db.child("expenses").child(id).get().await()
+                    Expense(
+                        expenseId = snap.key ?: "",
+                        groupId = snap.child("groupId").value as? String ?: "",
+                        title = snap.child("title").value as? String ?: "",
+                        amount = (snap.child("amount").value as? Long)?.toInt() ?: 0,
+                        paidBy = snap.child("paidBy").value as? String ?: "",
+                        paidByName = snap.child("paidByName").value as? String ?: "Unknown"
+                    )
                 }
-            }
-            override fun onCancelled(error: DatabaseError) {}
-        })
+            }.awaitAll().sortedByDescending { it.expenseId }
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
-    fun getExpenseDetails(expenseId: String, onResult: (Expense?, Map<String, Int>) -> Unit) {
-        db.child("expenses").child(expenseId).get().addOnSuccessListener { snap ->
-            if (!snap.exists()) return@addOnSuccessListener onResult(null, emptyMap())
+    suspend fun getExpenseDetails(expenseId: String): Pair<Expense?, Map<String, Int>> = withContext(Dispatchers.IO) {
+        try {
+            val snap = db.child("expenses").child(expenseId).get().await()
+            if (!snap.exists()) return@withContext Pair(null, emptyMap())
             
             val expense = Expense(
                 expenseId = snap.key ?: "",
@@ -164,79 +126,78 @@ class FirebaseRepository {
                 paidByName = snap.child("paidByName").value as? String ?: "Unknown"
             )
 
-            db.child("expenseParticipants").child(expenseId).get().addOnSuccessListener { partSnap ->
-                val participants = mutableMapOf<String, Int>()
-                partSnap.children.forEach { participant ->
-                    val userId = participant.key ?: return@forEach
-                    val amount = (participant.value as? Long)?.toInt() ?: 0
-                    participants[userId] = amount
-                }
-                onResult(expense, participants)
+            val partSnap = db.child("expenseParticipants").child(expenseId).get().await()
+            val participants = partSnap.children.associate { 
+                (it.key ?: "") to ((it.value as? Long)?.toInt() ?: 0)
             }
+            Pair(expense, participants)
+        } catch (e: Exception) {
+            Pair(null, emptyMap())
         }
     }
 
-    fun calculateGroupBalances(groupId: String, onResult: (Map<String, Double>) -> Unit) {
+    suspend fun calculateGroupBalances(groupId: String): Map<String, Double> = withContext(Dispatchers.IO) {
         val balances = mutableMapOf<String, Double>()
-
-        db.child("groupExpenses").child(groupId).get().addOnSuccessListener { snapshot ->
+        try {
+            val snapshot = db.child("groupExpenses").child(groupId).get().await()
             val expenseIds = snapshot.children.mapNotNull { it.key }
-            if (expenseIds.isEmpty()) return@addOnSuccessListener onResult(emptyMap())
+            if (expenseIds.isEmpty()) return@withContext emptyMap()
 
-            var processedCount = 0
-            expenseIds.forEach { expId ->
-                db.child("expenses").child(expId).get().addOnSuccessListener { expSnap ->
+            expenseIds.map { expId ->
+                async {
+                    val expSnap = db.child("expenses").child(expId).get().await()
                     val payerId = expSnap.child("paidBy").value as? String ?: ""
                     val totalAmount = (expSnap.child("amount").value as? Long)?.toDouble() ?: 0.0
 
-                    balances[payerId] = (balances[payerId] ?: 0.0) + totalAmount
+                    synchronized(balances) {
+                        balances[payerId] = (balances[payerId] ?: 0.0) + totalAmount
+                    }
 
-                    db.child("expenseParticipants").child(expId).get().addOnSuccessListener { partSnap ->
-                        partSnap.children.forEach { participant ->
-                            val userId = participant.key ?: return@forEach
-                            val owedAmount = (participant.value as? Long)?.toDouble() ?: 0.0
+                    val partSnap = db.child("expenseParticipants").child(expId).get().await()
+                    partSnap.children.forEach { participant ->
+                        val userId = participant.key ?: return@forEach
+                        val owedAmount = (participant.value as? Long)?.toDouble() ?: 0.0
+                        synchronized(balances) {
                             balances[userId] = (balances[userId] ?: 0.0) - owedAmount
-                        }
-
-                        processedCount++
-                        if (processedCount == expenseIds.size) {
-                            onResult(balances)
                         }
                     }
                 }
-            }
+            }.awaitAll()
+            balances
+        } catch (e: Exception) {
+            emptyMap()
         }
     }
 
-    fun getUserNetBalanceInGroup(groupId: String, userId: String, onResult: (Double) -> Unit) {
-        var balance = 0.0
-        db.child("groupExpenses").child(groupId).get().addOnSuccessListener { snapshot ->
+    suspend fun getUserNetBalanceInGroup(groupId: String, userId: String): Double = withContext(Dispatchers.IO) {
+        try {
+            val snapshot = db.child("groupExpenses").child(groupId).get().await()
             val expenseIds = snapshot.children.mapNotNull { it.key }
-            if (expenseIds.isEmpty()) return@addOnSuccessListener onResult(0.0)
+            if (expenseIds.isEmpty()) return@withContext 0.0
 
-            var count = 0
-            expenseIds.forEach { id ->
-                db.child("expenses").child(id).get().addOnSuccessListener { expSnap ->
+            val results = expenseIds.map { id ->
+                async {
+                    val expSnap = db.child("expenses").child(id).get().await()
                     val payer = expSnap.child("paidBy").value as? String ?: ""
                     val amount = (expSnap.child("amount").value as? Long)?.toDouble() ?: 0.0
                     
-                    if (payer == userId) balance += amount
+                    var b = 0.0
+                    if (payer == userId) b += amount
 
-                    db.child("expenseParticipants").child(id).child(userId).get().addOnSuccessListener { partSnap ->
-                        val userOwes = (partSnap.value as? Long)?.toDouble() ?: 0.0
-                        balance -= userOwes
-                        
-                        count++
-                        if (count == expenseIds.size) onResult(balance)
-                    }
+                    val partSnap = db.child("expenseParticipants").child(id).child(userId).get().await()
+                    val userOwes = (partSnap.value as? Long)?.toDouble() ?: 0.0
+                    b - userOwes
                 }
-            }
+            }.awaitAll()
+            results.sum()
+        } catch (e: Exception) {
+            0.0
         }
     }
 
-    fun createGroup(name: String, description: String, members: List<User>, onResult: (Boolean, String) -> Unit) {
-        val currentUserId = getCurrentUserId() ?: return onResult(false, "User not logged in")
-        val groupId = db.child("groups").push().key ?: return onResult(false, "Failed to generate ID")
+    suspend fun createGroup(name: String, description: String, members: List<User>): Pair<Boolean, String> {
+        val currentUserId = getCurrentUserId() ?: return Pair(false, "User not logged in")
+        val groupId = db.child("groups").push().key ?: return Pair(false, "Failed to generate ID")
 
         val groupData = mapOf(
             "id" to groupId,
@@ -260,31 +221,36 @@ class FirebaseRepository {
             updates["/userGroups/${user.userId}/$groupId"] = true
         }
 
-        db.updateChildren(updates)
-            .addOnSuccessListener { onResult(true, "Group created successfully") }
-            .addOnFailureListener { onResult(false, it.message ?: "Failed to create group") }
+        return try {
+            db.updateChildren(updates).await()
+            Pair(true, "Group created successfully")
+        } catch (e: Exception) {
+            Pair(false, e.message ?: "Failed to create group")
+        }
     }
 
-    fun addMemberToGroup(groupId: String, userId: String, onResult: (Boolean, String) -> Unit) {
+    suspend fun addMemberToGroup(groupId: String, userId: String): Pair<Boolean, String> {
         val updates = mapOf(
             "/groupMembers/$groupId/$userId" to true,
             "/userGroups/$userId/$groupId" to true
         )
-        db.updateChildren(updates)
-            .addOnSuccessListener { onResult(true, "Member added") }
-            .addOnFailureListener { onResult(false, it.message ?: "Failed to add member") }
+        return try {
+            db.updateChildren(updates).await()
+            Pair(true, "Member added")
+        } catch (e: Exception) {
+            Pair(false, e.message ?: "Failed to add member")
+        }
     }
 
-    fun addExpense(
+    suspend fun addExpense(
         groupId: String,
         title: String,
         amount: Int,
         paidBy: String,
         paidByName: String,
-        participants: Map<String, Int>,
-        onResult: (Boolean, String) -> Unit
-    ) {
-        val expenseId = db.child("expenses").push().key ?: return onResult(false, "Failed to generate ID")
+        participants: Map<String, Int>
+    ): Pair<Boolean, String> {
+        val expenseId = db.child("expenses").push().key ?: return Pair(false, "Failed to generate ID")
         
         val expenseData = mapOf(
             "expenseId" to expenseId,
@@ -305,29 +271,30 @@ class FirebaseRepository {
             updates["/userInvolvedExpenses/$userId/$expenseId"] = true
         }
 
-        db.updateChildren(updates)
-            .addOnSuccessListener { onResult(true, "Expense added successfully") }
-            .addOnFailureListener { onResult(false, it.message ?: "Failed to add expense") }
+        return try {
+            db.updateChildren(updates).await()
+            Pair(true, "Expense added successfully")
+        } catch (e: Exception) {
+            Pair(false, e.message ?: "Failed to add expense")
+        }
     }
 
-    fun updateExpense(
+    suspend fun updateExpense(
         expenseId: String,
         title: String,
         amount: Int,
-        participants: Map<String, Int>,
-        onResult: (Boolean, String) -> Unit
-    ) {
-        val updates = mutableMapOf<String, Any?>()
-        updates["/expenses/$expenseId/title"] = title
-        updates["/expenses/$expenseId/amount"] = amount
-        
-        // Remove old participants and set new ones
-        db.child("expenseParticipants").child(expenseId).setValue(participants)
-            .addOnSuccessListener {
-                db.updateChildren(updates)
-                    .addOnSuccessListener { onResult(true, "Updated successfully") }
-                    .addOnFailureListener { onResult(false, it.message ?: "Failed metadata") }
-            }
-            .addOnFailureListener { onResult(false, it.message ?: "Failed splits") }
+        participants: Map<String, Int>
+    ): Pair<Boolean, String> {
+        return try {
+            db.child("expenseParticipants").child(expenseId).setValue(participants).await()
+            val updates = mapOf(
+                "/expenses/$expenseId/title" to title,
+                "/expenses/$expenseId/amount" to amount
+            )
+            db.updateChildren(updates).await()
+            Pair(true, "Updated successfully")
+        } catch (e: Exception) {
+            Pair(false, e.message ?: "Failed update")
+        }
     }
 }

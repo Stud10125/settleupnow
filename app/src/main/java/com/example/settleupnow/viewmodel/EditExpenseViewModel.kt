@@ -1,12 +1,14 @@
 package com.example.settleupnow.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.settleupnow.Repository.FirebaseRepository
 import com.example.settleupnow.model.Expense
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class EditExpenseViewModel(private val repository: FirebaseRepository = FirebaseRepository()) : ViewModel() {
     private val _expense = MutableStateFlow<Expense?>(null)
@@ -20,19 +22,19 @@ class EditExpenseViewModel(private val repository: FirebaseRepository = Firebase
     private var memberNameToId = mutableMapOf<String, String>()
 
     fun loadExpense(expenseId: String) {
-        repository.getExpenseDetails(expenseId) { exp, participants ->
+        viewModelScope.launch {
+            val (exp, participants) = repository.getExpenseDetails(expenseId)
             _expense.value = exp
             if (exp != null) {
-                repository.getGroupMembers(exp.groupId) { members ->
-                    val uiSplits = mutableMapOf<String, String>()
-                    participants.forEach { (uid, amount) ->
-                        val user = members.find { it.userId == uid }
-                        val name = user?.name ?: "Unknown"
-                        uiSplits[name] = amount.toString()
-                        memberNameToId[name] = uid
-                    }
-                    _editedSplits.value = uiSplits
+                val members = repository.getGroupMembers(exp.groupId)
+                val uiSplits = mutableMapOf<String, String>()
+                participants.forEach { (uid, amount) ->
+                    val user = members.find { it.userId == uid }
+                    val name = user?.name ?: "Unknown"
+                    uiSplits[name] = amount.toString()
+                    memberNameToId[name] = uid
                 }
+                _editedSplits.value = uiSplits
             }
         }
     }
@@ -53,12 +55,14 @@ class EditExpenseViewModel(private val repository: FirebaseRepository = Firebase
             newTotal += amount
         }
 
-        repository.updateExpense(
-            expenseId = exp.expenseId,
-            title = exp.title,
-            amount = newTotal,
-            participants = newSplits,
-            onResult = { success, _ -> onResult(success) }
-        )
+        viewModelScope.launch {
+            val (success, _) = repository.updateExpense(
+                expenseId = exp.expenseId,
+                title = exp.title,
+                amount = newTotal,
+                participants = newSplits
+            )
+            onResult(success)
+        }
     }
 }

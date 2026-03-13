@@ -1,10 +1,14 @@
 package com.example.settleupnow.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.settleupnow.Repository.FirebaseRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 
 data class GroupAnalytics(
     val groupId: String,
@@ -22,29 +26,24 @@ class AnalyticsViewModel(private val repository: FirebaseRepository = FirebaseRe
     fun fetchAnalytics() {
         val currentUserId = repository.getCurrentUserId() ?: return
         
-        repository.getUserGroups { groups ->
-            val analyticsList = mutableListOf<GroupAnalytics>()
-            var processedCount = 0
-            var runningTotal = 0.0
-
+        viewModelScope.launch {
+            val groups = repository.getUserGroups()
+            
             if (groups.isEmpty()) {
                 _groupBalances.value = emptyList()
                 _totalBalance.value = 0.0
-                return@getUserGroups
+                return@launch
             }
 
-            groups.forEach { group ->
-                repository.getUserNetBalanceInGroup(group.id, currentUserId) { balance ->
-                    analyticsList.add(GroupAnalytics(group.id, group.groupName, balance))
-                    runningTotal += balance
-                    processedCount++
-                    
-                    if (processedCount == groups.size) {
-                        _groupBalances.value = analyticsList
-                        _totalBalance.value = runningTotal
-                    }
+            val analyticsList = groups.map { group ->
+                async {
+                    val balance = repository.getUserNetBalanceInGroup(group.id, currentUserId)
+                    GroupAnalytics(group.id, group.groupName, balance)
                 }
-            }
+            }.awaitAll()
+
+            _groupBalances.value = analyticsList
+            _totalBalance.value = analyticsList.sumOf { it.balance }
         }
     }
 }
