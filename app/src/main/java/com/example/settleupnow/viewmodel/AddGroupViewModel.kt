@@ -29,7 +29,7 @@ class AddGroupViewModel(private val repository: FirebaseRepository = FirebaseRep
     }
 
     fun addMember(user: User) {
-        if (!_members.value.all { it.userId != user.userId }) return // Check by ID
+        if (!_members.value.all { it.userId != user.userId }) return
         _members.value = _members.value + user
     }
 

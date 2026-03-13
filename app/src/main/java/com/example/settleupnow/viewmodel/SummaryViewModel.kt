@@ -40,8 +40,8 @@ class SummaryViewModel(private val repository: FirebaseRepository = FirebaseRepo
         var dIdx = 0
         var cIdx = 0
 
-        val dList = debtors.sortedBy { it.balance }.toMutableList() // Most negative first
-        val cList = creditors.sortedByDescending { it.balance }.toMutableList() // Most positive first
+        val dList = debtors.sortedBy { it.balance }.toMutableList()
+        val cList = creditors.sortedByDescending { it.balance }.toMutableList()
 
         while (dIdx < dList.size && cIdx < cList.size) {
             val debtor = dList[dIdx]

@@ -183,7 +183,7 @@ fun GroupDetailScreen(
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp, 0.dp, 16.dp, 80.dp), // Space for FAB
+                contentPadding = PaddingValues(16.dp, 0.dp, 16.dp, 80.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(expenses) { expense ->
