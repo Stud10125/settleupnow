@@ -78,23 +78,22 @@ class AddExpencesViewModel(private val repository: FirebaseRepository = Firebase
     }
 
     fun expencesList(index: Int, amountStr: String) {
-        _expencesList.update { currentList ->
-            currentList.toMutableList().apply { if (index < size) this[index] = amountStr }
-        }
-        calculateTotal()
-    }
+        val prevValue = _expencesList.value.getOrElse(index) { "" }
+            .split("+")
+            .mapNotNull { it.trim().toIntOrNull() }
+            .sum()
 
-    fun calculateTotal() {
-        var sum = 0
-        for (amountStr in _expencesList.value) {
-            val totalForMember = amountStr.split("+")
-                .map { it.trim() }
-                .filter { it.isNotEmpty() }
-                .mapNotNull { it.toIntOrNull() }
-                .sum()
-            sum += totalForMember
+        val newValue = amountStr.split("+")
+            .mapNotNull { it.trim().toIntOrNull() }
+            .sum()
+
+        _expencesList.update { currentList ->
+            currentList.toMutableList().apply {
+                if (index < size) this[index] = amountStr
+            }
         }
-        _total.value = sum
+
+        _total.value = _total.value - prevValue + newValue
     }
 
     fun clearData() {
