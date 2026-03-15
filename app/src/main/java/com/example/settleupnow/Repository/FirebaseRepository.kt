@@ -5,6 +5,8 @@ import com.example.settleupnow.model.Group
 import com.example.settleupnow.model.Expense
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,12 +14,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 
 class FirebaseRepository {
-
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseDatabase.getInstance().reference
-
     fun getCurrentUserId(): String? = auth.currentUser?.uid
-
     suspend fun register(email: String, password: String, name: String): Pair<Boolean, String> {
         return try {
             val result = auth.createUserWithEmailAndPassword(email, password).await()
@@ -38,8 +37,12 @@ class FirebaseRepository {
         return try {
             auth.signInWithEmailAndPassword(email, password).await()
             Pair(true, "Login success")
+        } catch (e: FirebaseAuthInvalidUserException) {
+            Pair(false, "No account found with this email.")
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            Pair(false, "Incorrect password. Please try again.")
         } catch (e: Exception) {
-            Pair(false, e.message ?: "Login failed")
+            Pair(false, e.message ?: "Login failed. Please check your connection.")
         }
     }
 

@@ -1,43 +1,26 @@
 package com.example.settleupnow.view.composables
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Payments
+import androidx.compose.material.icons.filled.Title
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -65,6 +48,12 @@ fun AddExpencesScreen(
     val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
 
+    // Color Palette
+    val creamyYellow = Color(0xFFEEFABD)
+    val sageGreen = Color(0xFFA0D585)
+    val steelBlue = Color(0xFF6984A9)
+    val deepNavy = Color(0xFF263B6A)
+
     val hasInvalidUnequalInput = splitType == "Unequal" && expencesList.any { str ->
         str.any { char -> !char.isDigit() && char != '+' && !char.isWhitespace() }
     }
@@ -80,205 +69,341 @@ fun AddExpencesScreen(
         focusRequester.requestFocus()
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 20.dp)
-        ) {
-            IconButton(onClick = { 
-                viewModel.clearData()
-                navController.popBackStack() 
-            }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(creamyYellow, sageGreen)
                 )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Add New Expense",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
             )
-        }
-
-        Text(text = "What is this for? *", fontWeight = FontWeight.Bold)
-        TextField(
-            value = expenceTitle,
-            onValueChange = { viewModel.expenceTitle(it) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(focusRequester),
-            placeholder = { Text("Title") }
-        )
-        if (expenceTitle.isNotEmpty() && !isTitleValid) {
-            Text("Title cannot be empty", color = Color.Red, fontSize = 12.sp)
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text(text = "Add a description", fontWeight = FontWeight.Bold)
-        TextField(
-            value = description,
-            onValueChange = { viewModel.description(it) },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Optional description") }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(text = "Paid By", fontWeight = FontWeight.Bold)
-        Box(modifier = Modifier.fillMaxWidth()) {
-            TextField(
-                value = paidBy,
-                onValueChange = {},
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .clickable { expanded = !expanded }
-            )
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                members.forEach { member ->
-                    DropdownMenuItem(
-                        text = { Text(member.name) },
-                        onClick = {
-                            viewModel.paidBy(member.name)
-                            expanded = false
-                        }
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text(text = "How to split?", fontWeight = FontWeight.Bold)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            RadioButton(
-                selected = splitType == "Equal",
-                onClick = { viewModel.splitType("Equal") }
-            )
-            Text("Equally")
-            Spacer(modifier = Modifier.width(20.dp))
-            RadioButton(
-                selected = splitType == "Unequal",
-                onClick = { viewModel.splitType("Unequal") }
-            )
-            Text("Unequally")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (splitType == "Equal") {
-            Text(text = "Total Amount *", fontWeight = FontWeight.Bold)
-            TextField(
-                value = amount,
-                onValueChange = { viewModel._amount(it) },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-            if (amount.isNotEmpty() && amountValue <= 0) {
-                Text("Amount must be greater than 0", color = Color.Red, fontSize = 12.sp)
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Select Members", fontWeight = FontWeight.Bold)
-
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                itemsIndexed(members) { index, member ->
-                    val isChecked = checkedList.getOrElse(index) { false }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = isChecked,
-                            onCheckedChange = { viewModel.checkedList(index, it) }
-                        )
-                        Text(member.name)
-                    }
-                }
-            }
-        } else {
-            Text(text = "Enter amount for each *", fontWeight = FontWeight.Bold)
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                itemsIndexed(members) { index, member ->
-                    val memberAmount = expencesList.getOrElse(index) { "" }
+    ) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                Surface(
+                    color = Color.Transparent,
+                    modifier = Modifier.statusBarsPadding()
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp),
+                            .height(64.dp)
+                            .padding(horizontal = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(member.name, modifier = Modifier.weight(1f))
-                        TextField(
-                            value = memberAmount,
-                            onValueChange = { viewModel.expencesList(index, it) },
-                            modifier = Modifier.weight(1f),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                        IconButton(onClick = {
+                            viewModel.clearData()
+                            navController.popBackStack()
+                        }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = deepNavy
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "ADD EXPENSE",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = deepNavy
                         )
                     }
                 }
-            }
-
-            val isTotalInvalid = total <= 0
-            val hasInteractedWithUnequal = expencesList.any { it.isNotEmpty() }
-            val showError = (isTotalInvalid || hasInvalidUnequalInput) && hasInteractedWithUnequal
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .background(if (showError) Color(0xFFFFCCCC) else Color(0xFFEEEEEE))
-                    .padding(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+            },
+            bottomBar = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                        .navigationBarsPadding()
                 ) {
-                    Text("Total Calculated:", fontWeight = FontWeight.Bold)
-                    Text("$total", fontWeight = FontWeight.Bold)
-                }
-                if (showError) {
-                    Text(
-                        text = if (hasInvalidUnequalInput)
-                            "Invalid! Use numbers and '+' only"
-                        else "Total must be more than 0",
-                        color = Color.Red,
-                        fontSize = 12.sp
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = { 
-                viewModel.saveExpense { success, message ->
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                    if (success) {
-                        viewModel.clearData()
-                        navController.popBackStack()
+                    Button(
+                        onClick = {
+                            viewModel.saveExpense { success, message ->
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                if (success) {
+                                    viewModel.clearData()
+                                    navController.popBackStack()
+                                }
+                            }
+                        },
+                        enabled = isFormValid,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = deepNavy,
+                            disabledContainerColor = deepNavy.copy(alpha = 0.5f)
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                    ) {
+                        Text("Save Expense", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
                     }
                 }
-            },
-            enabled = isFormValid,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-        ) {
-            Text("Save Expense")
+            }
+        ) { padding ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 20.dp)
+            ) {
+                item {
+                    Spacer(Modifier.height(16.dp))
+                    
+                    // Expense Details Card
+                    Card(
+                        shape = RoundedCornerShape(24.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                        border = BorderStroke(2.dp, sageGreen),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            OutlinedTextField(
+                                value = expenceTitle,
+                                onValueChange = { viewModel.expenceTitle(it) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(focusRequester),
+                                label = { Text("What is this for? *") },
+                                placeholder = { Text("e.g. Dinner, Movie") },
+                                leadingIcon = { Icon(Icons.Default.Title, null, tint = deepNavy) },
+                                shape = RoundedCornerShape(16.dp),
+                                isError = expenceTitle.isNotEmpty() && !isTitleValid,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = deepNavy,
+                                    unfocusedBorderColor = steelBlue.copy(alpha = 0.5f),
+                                    focusedLabelColor = deepNavy,
+                                    unfocusedLabelColor = steelBlue
+                                )
+                            )
+                            if (expenceTitle.isNotEmpty() && !isTitleValid) {
+                                Text("Title cannot be empty", color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 16.dp, top = 4.dp))
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            OutlinedTextField(
+                                value = description,
+                                onValueChange = { viewModel.description(it) },
+                                modifier = Modifier.fillMaxWidth(),
+                                label = { Text("Description") },
+                                placeholder = { Text("Optional details") },
+                                leadingIcon = { Icon(Icons.Default.Description, null, tint = deepNavy) },
+                                shape = RoundedCornerShape(16.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = deepNavy,
+                                    unfocusedBorderColor = steelBlue.copy(alpha = 0.5f),
+                                    focusedLabelColor = deepNavy,
+                                    unfocusedLabelColor = steelBlue
+                                )
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Text("Payment Details", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = deepNavy)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(
+                            value = paidBy,
+                            onValueChange = {},
+                            readOnly = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("Paid By") },
+                            leadingIcon = { Icon(Icons.Default.Payments, null, tint = deepNavy) },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = deepNavy,
+                                unfocusedBorderColor = steelBlue.copy(alpha = 0.5f),
+                                focusedLabelColor = deepNavy,
+                                unfocusedLabelColor = steelBlue
+                            )
+                        )
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .clickable { expanded = !expanded }
+                        )
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                            modifier = Modifier.background(Color.White).fillMaxWidth(0.8f)
+                        ) {
+                            members.forEach { member ->
+                                DropdownMenuItem(
+                                    text = { Text(member.name, color = deepNavy) },
+                                    onClick = {
+                                        viewModel.paidBy(member.name)
+                                        expanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Text("How to split?", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = deepNavy)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    ) {
+                        RadioButton(
+                            selected = splitType == "Equal",
+                            onClick = { viewModel.splitType("Equal") },
+                            colors = RadioButtonDefaults.colors(selectedColor = deepNavy)
+                        )
+                        Text("Equally", color = deepNavy)
+                        Spacer(modifier = Modifier.width(20.dp))
+                        RadioButton(
+                            selected = splitType == "Unequal",
+                            onClick = { viewModel.splitType("Unequal") },
+                            colors = RadioButtonDefaults.colors(selectedColor = deepNavy)
+                        )
+                        Text("Unequally", color = deepNavy)
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                if (splitType == "Equal") {
+                    item {
+                        OutlinedTextField(
+                            value = amount,
+                            onValueChange = { viewModel._amount(it) },
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("Total Amount *") },
+                            prefix = { Text("₹ ", color = deepNavy, fontWeight = FontWeight.Bold) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = deepNavy,
+                                unfocusedBorderColor = steelBlue.copy(alpha = 0.5f),
+                                focusedLabelColor = deepNavy,
+                                unfocusedLabelColor = steelBlue
+                            )
+                        )
+                        if (amount.isNotEmpty() && amountValue <= 0) {
+                            Text("Amount must be greater than 0", color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 16.dp, top = 4.dp))
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text("Select Members", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = deepNavy)
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    itemsIndexed(members) { index, member ->
+                        val isChecked = checkedList.getOrElse(index) { false }
+                        Card(
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (isChecked) creamyYellow.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.7f)
+                            ),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, if (isChecked) sageGreen else steelBlue.copy(alpha = 0.1f)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .clickable { viewModel.checkedList(index, !isChecked) }
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    checked = isChecked,
+                                    onCheckedChange = { viewModel.checkedList(index, it) },
+                                    colors = CheckboxDefaults.colors(checkedColor = deepNavy)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(member.name, fontWeight = FontWeight.Medium, color = deepNavy)
+                            }
+                        }
+                    }
+                } else {
+                    item {
+                        Text("Enter amount for each *", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = deepNavy)
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Total Calculated Card moved here
+                        val isTotalInvalid = total <= 0
+                        val hasInteractedWithUnequal = expencesList.any { it.isNotEmpty() }
+                        val showError = (isTotalInvalid || hasInvalidUnequalInput) && hasInteractedWithUnequal
+
+                        Card(
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (showError) Color(0xFFFFEBEE) else creamyYellow.copy(alpha = 0.5f)
+                            ),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, if (showError) Color.Red.copy(alpha = 0.3f) else deepNavy.copy(alpha = 0.2f)),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text("Total Calculated", style = MaterialTheme.typography.labelMedium, color = deepNavy)
+                                    if (showError) {
+                                        Text(
+                                            text = if (hasInvalidUnequalInput) "Invalid input!" else "Total must be > 0",
+                                            color = Color.Red,
+                                            fontSize = 12.sp
+                                        )
+                                    }
+                                }
+                                Text("₹ $total", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = deepNavy)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    itemsIndexed(members) { index, member ->
+                        val memberAmount = expencesList.getOrElse(index) { "" }
+                        Card(
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.7f)),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, steelBlue.copy(alpha = 0.1f)),
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(member.name, modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium, color = deepNavy)
+                                OutlinedTextField(
+                                    value = memberAmount,
+                                    onValueChange = { viewModel.expencesList(index, it) },
+                                    modifier = Modifier.width(120.dp),
+                                    prefix = { Text("₹ ", color = deepNavy) },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    shape = RoundedCornerShape(12.dp),
+                                    singleLine = true,
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = deepNavy,
+                                        unfocusedBorderColor = steelBlue.copy(alpha = 0.5f),
+                                        focusedLabelColor = deepNavy,
+                                        unfocusedLabelColor = steelBlue
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                item {
+                    Spacer(modifier = Modifier.height(100.dp)) 
+                }
+            }
         }
     }
 }

@@ -5,12 +5,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -31,57 +37,174 @@ fun GroupsScreen(
         viewModel.fetchUserGroups()
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text(
-            text = "Groups",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-
-        Spacer(Modifier.height(16.dp))
-
-        if (groups.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
+    Scaffold(
+        containerColor = Color.Transparent, 
+        topBar = {
+            Surface(
+                color = Color.Transparent,
+                modifier = Modifier.statusBarsPadding()
             ) {
-                Text(
-                    text = "No groups yet.\nTap \"Add Group\" to create one.",
-                    fontSize = 14.sp,
-                    color = Color.Gray
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "GROUPS",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp,
+                        color = Color(0xFF263B6A) // Deep Navy
+                    )
+                }
+            }
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navController.navigate(Routes.ADD_GROUP) },
+                containerColor = Color(0xFF263B6A), // Deep Navy
+                contentColor = Color.White,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add Group",
+                    modifier = Modifier.size(28.dp)
                 )
             }
-        } else {
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                items(groups) { group ->
+        }
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFFEEFABD),
+                            Color(0xFFA0D585)
+                        )
+                    )
+                )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 20.dp)
+            ) {
+                if (groups.isEmpty()) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .height(70.dp)
-                            .background(
-                                color = Color(0xFFE3F2FD),
-                                shape = RoundedCornerShape(10.dp)
-                            )
-                            .clickable { navController.navigate("${Routes.GROUP_DATA}/${group.id}") }
-                            .padding(16.dp),
-                        contentAlignment = Alignment.CenterStart
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(group.groupName, fontSize = 18.sp)
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Surface(
+                                modifier = Modifier.size(100.dp),
+                                shape = CircleShape,
+                                color = Color(0xFF6984A9).copy(alpha = 0.2f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Group,
+                                    contentDescription = null,
+                                    modifier = Modifier.padding(24.dp)
+                                        .background(Color(0xFF6984A9))
+                                )
+                            }
+                            Spacer(Modifier.height(24.dp))
+                            Text(
+                                text = "No groups yet",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF263B6A)
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = "Tap the + button to create a new group\nand start splitting bills.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color(0xFF263B6A).copy(alpha = 0.7f),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(vertical = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(groups) { group ->
+                            GroupCard(
+                                groupName = group.groupName,
+                                onClick = { navController.navigate("${Routes.GROUP_DATA}/${group.id}") }
+                            )
+                        }
                     }
                 }
             }
-
         }
-        
-        Button(
-            onClick = { navController.navigate(Routes.ADD_GROUP) },
-            modifier = Modifier.align(Alignment.End)
+    }
+}
+
+@Composable
+fun GroupCard(groupName: String, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Add Group")
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(CircleShape)
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xFF6984A9),
+                                Color(0xFF263B6A)
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = groupName.firstOrNull()?.uppercase() ?: "G",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+
+            Spacer(Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = groupName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF263B6A)
+                )
+                Text(
+                    text = "Tap to view expenses",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF6984A9)
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowRight,
+                contentDescription = null,
+                tint = Color(0xFF263B6A).copy(alpha = 0.7f)
+            )
         }
     }
 }
