@@ -26,12 +26,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.settleupnow.viewmodel.RegisterViewModel
 
 @Composable
 fun RegisterScreenUI(
     viewModel: RegisterViewModel,
-    onLogin: () -> Unit
+    navController: NavController,
 ) {
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var confirmPasswordVisible by rememberSaveable { mutableStateOf(false) }
@@ -276,7 +277,9 @@ fun RegisterScreenUI(
                     if (validateInputs()) {
                         viewModel.signUp { success, message ->
                             if (success) {
-                                onLogin()
+                                viewModel.clear()
+                                confirmPassword=""
+                                navController.popBackStack()
                             } else {
                                 Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                             }
@@ -298,7 +301,11 @@ fun RegisterScreenUI(
 
             Spacer(Modifier.height(24.dp))
 
-            TextButton(onClick = onLogin) {
+            TextButton(onClick = {
+                viewModel.clear()
+                confirmPassword=""
+                navController.popBackStack()
+            }) {
                 Text(
                     text = buildAnnotatedString {
                         append("Already have an account? ")

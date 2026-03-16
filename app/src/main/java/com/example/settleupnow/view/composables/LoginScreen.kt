@@ -35,7 +35,6 @@ import com.example.settleupnow.viewmodel.LoginViewModel
 @Composable
 fun LoginScreenUI(
     navController: NavController,
-    onRegister: () -> Unit,
     viewModel: LoginViewModel
 ) {
     val email by viewModel.email.collectAsState()
@@ -208,6 +207,7 @@ fun LoginScreenUI(
                                 navController.navigate(Routes.HOME) {
                                     popUpTo(Routes.LOGIN) { inclusive = true }
                                 }
+                                viewModel.clear()
                             } else {
                                 Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                             }
@@ -229,7 +229,10 @@ fun LoginScreenUI(
 
             Spacer(Modifier.height(24.dp))
 
-            TextButton(onClick = onRegister) {
+            TextButton(onClick = {
+                navController.navigate(Routes.REGISTER)
+                viewModel.clear()
+            }) {
                 Text(
                     text = buildAnnotatedString {
                         append("New user? ")

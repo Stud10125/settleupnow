@@ -42,7 +42,6 @@ fun AppNavigation(
         composable(Routes.LOGIN) {
             LoginScreenUI(
                 navController = navController,
-                onRegister = { navController.navigate(Routes.REGISTER) },
                 viewModel = loginViewModel
             )
         }
@@ -50,11 +49,7 @@ fun AppNavigation(
         composable(Routes.REGISTER) {
             RegisterScreenUI(
                 viewModel = registerViewModel,
-                onLogin = {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.REGISTER) { inclusive = true }
-                    }
-                }
+                navController = navController
             )
         }
 

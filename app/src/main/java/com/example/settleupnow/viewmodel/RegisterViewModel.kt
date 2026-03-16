@@ -32,4 +32,10 @@ class RegisterViewModel : ViewModel() {
             onResult(success, message)
         }
     }
+
+    fun clear(){
+        name.value=""
+        email.value=""
+        password.value=""
+    }
 }

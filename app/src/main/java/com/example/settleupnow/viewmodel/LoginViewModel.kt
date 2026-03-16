@@ -29,4 +29,9 @@ class LoginViewModel : ViewModel() {
             onResult(success, message)
         }
     }
+
+    fun clear(){
+        _email.value=""
+        _password.value=""
+    }
 }
