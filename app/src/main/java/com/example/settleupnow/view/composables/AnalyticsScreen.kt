@@ -49,8 +49,8 @@ fun AnalyticsScreen(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFFEEFABD), // Creamy Yellow
-                        Color(0xFFA0D585)  // Sage Green
+                        Color(0xFFEEFABD),
+                        Color(0xFFA0D585)
                     )
                 )
             )
@@ -87,7 +87,6 @@ fun AnalyticsScreen(
             ) {
                 Spacer(Modifier.height(16.dp))
 
-                // Total Balance Dashboard Card
                 val isOverallPositive = totalBalance >= 0
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -100,8 +99,8 @@ fun AnalyticsScreen(
                             .background(
                                 brush = Brush.linearGradient(
                                     colors = listOf(
-                                        Color(0xFF263B6A), // Deep Navy
-                                        Color(0xFF6984A9)  // Steel Blue
+                                        Color(0xFF263B6A),
+                                        Color(0xFF6984A9)
                                     )
                                 )
                             )
@@ -207,7 +206,7 @@ fun AnalyticsScreen(
                                         modifier = Modifier
                                             .size(44.dp)
                                             .clip(CircleShape)
-                                            .background(Color(0xFF6984A9)), // Steel Blue for avatar
+                                            .background(Color(0xFF6984A9)),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(

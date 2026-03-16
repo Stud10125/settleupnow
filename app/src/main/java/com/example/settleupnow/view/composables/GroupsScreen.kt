@@ -55,7 +55,7 @@ fun GroupsScreen(
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.5.sp,
-                        color = Color(0xFF263B6A) // Deep Navy
+                        color = Color(0xFF263B6A)
                     )
                 }
             }
@@ -63,7 +63,7 @@ fun GroupsScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navController.navigate(Routes.ADD_GROUP) },
-                containerColor = Color(0xFF263B6A), // Deep Navy
+                containerColor = Color(0xFF263B6A),
                 contentColor = Color.White,
                 shape = RoundedCornerShape(16.dp)
             ) {

@@ -94,7 +94,6 @@ fun EditExpenseScreen(
                 ) {
                     Spacer(Modifier.height(16.dp))
                     
-                    // Expense Summary Header Card
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(24.dp),

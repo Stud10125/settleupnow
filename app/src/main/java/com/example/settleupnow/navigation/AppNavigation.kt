@@ -31,8 +31,7 @@ fun AppNavigation(
     addGroupViewModel: AddGroupViewModel = viewModel(),
     registerViewModel: RegisterViewModel = viewModel(),
     addExpencesViewModel: AddExpencesViewModel = viewModel(),
-    summaryViewModel: SummaryViewModel = viewModel(),
-    analyticsViewModel: AnalyticsViewModel = viewModel()
+    summaryViewModel: SummaryViewModel = viewModel()
 ) {
     val navController = rememberNavController()
     val auth = Firebase.auth

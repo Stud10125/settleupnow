@@ -113,34 +113,100 @@ fun AddExpencesScreen(
                 }
             },
             bottomBar = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                        .navigationBarsPadding()
-                ) {
-                    Button(
-                        onClick = {
-                            viewModel.saveExpense { success, message ->
-                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                                if (success) {
-                                    viewModel.clearData()
-                                    navController.popBackStack()
+                Column {
+                    if (splitType.equals("Unequal")) {
+                        Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 1.dp)) {
+                            Text(
+                                "Enter amount for each *",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = deepNavy
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            val isTotalInvalid = total <= 0
+                            val hasInteractedWithUnequal = expencesList.any { it.isNotEmpty() }
+                            val showError =
+                                (isTotalInvalid || hasInvalidUnequalInput) && hasInteractedWithUnequal
+
+                            Card(
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (showError) Color(0xFFFFEBEE) else creamyYellow.copy(
+                                        alpha = 0.5f
+                                    )
+                                ),
+                                border = androidx.compose.foundation.BorderStroke(
+                                    1.dp,
+                                    if (showError) Color.Red.copy(alpha = 0.3f) else deepNavy.copy(
+                                        alpha = 0.2f
+                                    )
+                                ),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column {
+                                        Text(
+                                            "Total Calculated",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = deepNavy
+                                        )
+                                        if (showError) {
+                                            Text(
+                                                text = if (hasInvalidUnequalInput) "Invalid input!" else "Total must be > 0",
+                                                color = Color.Red,
+                                                fontSize = 12.sp
+                                            )
+                                        }
+                                    }
+                                    Text(
+                                        "₹ $total",
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = deepNavy
+                                    )
                                 }
                             }
-                        },
-                        enabled = isFormValid,
+                        }
+                    }
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = deepNavy,
-                            disabledContainerColor = deepNavy.copy(alpha = 0.5f)
-                        ),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                            .padding(20.dp)
+                            .navigationBarsPadding()
                     ) {
-                        Text("Save Expense", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+                        Button(
+                            onClick = {
+                                viewModel.saveExpense { success, message ->
+                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                    if (success) {
+                                        viewModel.clearData()
+                                        navController.popBackStack()
+                                    }
+                                }
+                            },
+                            enabled = isFormValid,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = deepNavy,
+                                disabledContainerColor = deepNavy.copy(alpha = 0.5f)
+                            ),
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                        ) {
+                            Text(
+                                "Save Expense",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp,
+                                color = Color.White
+                            )
+                        }
                     }
                 }
             }
@@ -154,7 +220,6 @@ fun AddExpencesScreen(
                 item {
                     Spacer(Modifier.height(16.dp))
                     
-                    // Expense Details Card
                     Card(
                         shape = RoundedCornerShape(24.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
@@ -329,44 +394,6 @@ fun AddExpencesScreen(
                         }
                     }
                 } else {
-                    item {
-                        Text("Enter amount for each *", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = deepNavy)
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Total Calculated Card moved here
-                        val isTotalInvalid = total <= 0
-                        val hasInteractedWithUnequal = expencesList.any { it.isNotEmpty() }
-                        val showError = (isTotalInvalid || hasInvalidUnequalInput) && hasInteractedWithUnequal
-
-                        Card(
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = if (showError) Color(0xFFFFEBEE) else creamyYellow.copy(alpha = 0.5f)
-                            ),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, if (showError) Color.Red.copy(alpha = 0.3f) else deepNavy.copy(alpha = 0.2f)),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column {
-                                    Text("Total Calculated", style = MaterialTheme.typography.labelMedium, color = deepNavy)
-                                    if (showError) {
-                                        Text(
-                                            text = if (hasInvalidUnequalInput) "Invalid input!" else "Total must be > 0",
-                                            color = Color.Red,
-                                            fontSize = 12.sp
-                                        )
-                                    }
-                                }
-                                Text("₹ $total", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = deepNavy)
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-
                     itemsIndexed(members) { index, member ->
                         val memberAmount = expencesList.getOrElse(index) { "" }
                         Card(
