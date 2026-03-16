@@ -1,5 +1,6 @@
 package com.example.settleupnow.Repository
 
+import android.util.Log
 import com.example.settleupnow.model.User
 import com.example.settleupnow.model.Group
 import com.example.settleupnow.model.Expense

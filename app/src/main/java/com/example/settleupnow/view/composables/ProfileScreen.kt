@@ -142,7 +142,7 @@ fun ProfileInfoRow(label: String, value: String) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFF6984A9), // Steel Blue
+            color = Color(0xFF6984A9),
             fontWeight = FontWeight.Bold
         )
         Text(

@@ -6,14 +6,6 @@
         <entry key="Firebase Crashlytics">
           <value>
             <InsightsFilterSettings>
-              <option name="connection">
-                <ConnectionSetting>
-                  <option name="appId" value="com.example.settleupnow" />
-                  <option name="mobileSdkAppId" value="1:787195433738:android:1a789eda432a5befc3e0f3" />
-                  <option name="projectId" value="settleupnow-8c93a" />
-                  <option name="projectNumber" value="787195433738" />
-                </ConnectionSetting>
-              </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
               <option name="timeIntervalDays" value="THIRTY_DAYS" />
               <option name="visibilityType" value="ALL" />

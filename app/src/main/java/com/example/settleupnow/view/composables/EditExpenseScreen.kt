@@ -34,7 +34,6 @@ fun EditExpenseScreen(
     val expense by viewModel.expense.collectAsState()
     val editedSplits by viewModel.editedSplits.collectAsState()
 
-    // Color Palette
     val creamyYellow = Color(0xFFEEFABD)
     val sageGreen = Color(0xFFA0D585)
     val steelBlue = Color(0xFF6984A9)

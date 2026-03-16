@@ -73,7 +73,7 @@ fun AnalyticsScreen(
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.5.sp,
-                            color = Color(0xFF263B6A) // Deep Navy
+                            color = Color(0xFF263B6A)
                         )
                     }
                 }
@@ -158,7 +158,7 @@ fun AnalyticsScreen(
                     text = "Group Breakdown", 
                     style = MaterialTheme.typography.titleMedium, 
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF263B6A) // Deep Navy
+                    color = Color(0xFF263B6A)
                 )
                 
                 Spacer(Modifier.height(16.dp))

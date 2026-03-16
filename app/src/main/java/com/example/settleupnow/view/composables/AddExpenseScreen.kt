@@ -48,7 +48,6 @@ fun AddExpencesScreen(
     val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
 
-    // Color Palette
     val creamyYellow = Color(0xFFEEFABD)
     val sageGreen = Color(0xFFA0D585)
     val steelBlue = Color(0xFF6984A9)

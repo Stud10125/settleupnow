@@ -41,13 +41,11 @@ fun LoginScreenUI(
     val password by viewModel.password.collectAsState()
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     
-    // Validation states
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
 
-    // Color Palette
     val creamyYellow = Color(0xFFEEFABD)
     val sageGreen = Color(0xFFA0D585)
     val steelBlue = Color(0xFF6984A9)
