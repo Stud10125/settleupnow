@@ -3,12 +3,14 @@ package com.example.settleupnow.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.settleupnow.Repository.FirebaseRepository
+import com.example.settleupnow.model.Balance
 import com.example.settleupnow.model.SimplifiedTransaction
 import com.example.settleupnow.model.UserBalance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.PriorityQueue
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -32,32 +34,33 @@ class SummaryViewModel(private val repository: FirebaseRepository = FirebaseRepo
     }
 
     fun getSimplifiedTransactions(): List<SimplifiedTransaction> {
-        val debtors = _balances.value.filter { it.balance < -0.01 }.map { it.copy() }.toMutableList()
-        val creditors = _balances.value.filter { it.balance > 0.01 }.map { it.copy() }.toMutableList()
+        val balances = _balances.value.filter { Math.abs(it.balance) > 0.01 }
+
+        val debtors = PriorityQueue<Balance> { a, b -> a.balance.compareTo(b.balance) }
+        val creditors = PriorityQueue<Balance> { a, b -> b.balance.compareTo(a.balance) }
+
+        balances.forEach { (name, amount) ->
+            val balanceObj = Balance(userName = name, balance = amount)
+            if (amount < 0) debtors.add(balanceObj) else creditors.add(balanceObj)
+        }
 
         val transactions = mutableListOf<SimplifiedTransaction>()
 
-        var dIdx = 0
-        var cIdx = 0
+        while (debtors.isNotEmpty() && creditors.isNotEmpty()) {
+            val debtor = debtors.poll()!!
+            val creditor = creditors.poll()!!
 
-        val dList = debtors.sortedBy { it.balance }.toMutableList()
-        val cList = creditors.sortedByDescending { it.balance }.toMutableList()
+            val amount = minOf(Math.abs(debtor.balance), creditor.balance)
 
-        while (dIdx < dList.size && cIdx < cList.size) {
-            val debtor = dList[dIdx]
-            val creditor = cList[cIdx]
-
-            val amount = min(abs(debtor.balance), creditor.balance)
-            
             if (amount > 0.01) {
                 transactions.add(SimplifiedTransaction(debtor.userName, creditor.userName, amount))
             }
 
-            dList[dIdx] = debtor.copy(balance = debtor.balance + amount)
-            cList[cIdx] = creditor.copy(balance = creditor.balance - amount)
+            debtor.balance += amount
+            creditor.balance -= amount
 
-            if (abs(dList[dIdx].balance) < 0.01) dIdx++
-            if (abs(cList[cIdx].balance) < 0.01) cIdx++
+            if (Math.abs(debtor.balance) > 0.01) debtors.add(debtor)
+            if (Math.abs(creditor.balance) > 0.01) creditors.add(creditor)
         }
 
         return transactions

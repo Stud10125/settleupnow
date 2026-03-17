@@ -292,7 +292,7 @@ class FirebaseRepository {
         return try {
             db.child("expenseParticipants").child(expenseId).setValue(participants).await()
             val updates = mapOf(
-                "/expenses/$expenseId/title" to title,
+//                "/expenses/$expenseId/title" to title,
                 "/expenses/$expenseId/amount" to amount
             )
             db.updateChildren(updates).await()
